@@ -1,0 +1,5 @@
+Accuracy: 0.9785
+Precision: 0.9058
+Recall: 0.9939
+F1 Score: 0.9478
+Training Time: 8007.18 seconds

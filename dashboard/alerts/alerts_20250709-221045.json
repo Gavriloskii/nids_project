@@ -1,0 +1,2102 @@
+[
+  {
+    "timestamp": 1752099039.8818986,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1442,
+      "time": 1499169250.14095
+    }
+  },
+  {
+    "timestamp": 1752099039.8820076,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1442,
+      "time": 1499169250.140952
+    }
+  },
+  {
+    "timestamp": 1752099039.8820844,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49185",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.153317
+    }
+  },
+  {
+    "timestamp": 1752099039.8821635,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49185",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.153318
+    }
+  },
+  {
+    "timestamp": 1752099039.8822417,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49186",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.161486
+    }
+  },
+  {
+    "timestamp": 1752099039.8823164,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49186",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.161487
+    }
+  },
+  {
+    "timestamp": 1752099039.8823938,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49187",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.756795
+    }
+  },
+  {
+    "timestamp": 1752099039.8824644,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49187",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.756799
+    }
+  },
+  {
+    "timestamp": 1752099039.8825347,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "49666",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.757561
+    }
+  },
+  {
+    "timestamp": 1752099039.882643,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "49666",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.757564
+    }
+  },
+  {
+    "timestamp": 1752099039.8827176,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49188",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.757579
+    }
+  },
+  {
+    "timestamp": 1752099039.8827891,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49188",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.75758
+    }
+  },
+  {
+    "timestamp": 1752099039.8828595,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49189",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.757927
+    }
+  },
+  {
+    "timestamp": 1752099039.882929,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1604,
+      "time": 1499169250.758022
+    }
+  },
+  {
+    "timestamp": 1752099039.8829992,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1604,
+      "time": 1499169250.758025
+    }
+  },
+  {
+    "timestamp": 1752099039.883067,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49189",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.758112
+    }
+  },
+  {
+    "timestamp": 1752099039.883135,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "49671",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.762493
+    }
+  },
+  {
+    "timestamp": 1752099039.8832023,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "49671",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.762497
+    }
+  },
+  {
+    "timestamp": 1752099039.883271,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49190",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.762506
+    }
+  },
+  {
+    "timestamp": 1752099039.8833401,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49190",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169250.762553
+    }
+  },
+  {
+    "timestamp": 1752099039.8834088,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49191",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.069755
+    }
+  },
+  {
+    "timestamp": 1752099039.883479,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49191",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.069758
+    }
+  },
+  {
+    "timestamp": 1752099039.8835475,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49192",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.070385
+    }
+  },
+  {
+    "timestamp": 1752099039.8836179,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49192",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.070388
+    }
+  },
+  {
+    "timestamp": 1752099039.8837254,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1591,
+      "time": 1499169251.070461
+    }
+  },
+  {
+    "timestamp": 1752099039.8837812,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1591,
+      "time": 1499169251.070464
+    }
+  },
+  {
+    "timestamp": 1752099039.88383,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1687,
+      "time": 1499169251.071545
+    }
+  },
+  {
+    "timestamp": 1752099039.8838832,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1687,
+      "time": 1499169251.07155
+    }
+  },
+  {
+    "timestamp": 1752099039.8839324,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49193",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.075489
+    }
+  },
+  {
+    "timestamp": 1752099039.8839796,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49193",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.075493
+    }
+  },
+  {
+    "timestamp": 1752099039.8840294,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1700,
+      "time": 1499169251.076159
+    }
+  },
+  {
+    "timestamp": 1752099039.8840792,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1700,
+      "time": 1499169251.076165
+    }
+  },
+  {
+    "timestamp": 1752099039.884127,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 636,
+      "time": 1499169251.077529
+    }
+  },
+  {
+    "timestamp": 1752099039.8841724,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 636,
+      "time": 1499169251.077533
+    }
+  },
+  {
+    "timestamp": 1752099039.8842185,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49194",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.896678
+    }
+  },
+  {
+    "timestamp": 1752099039.8842642,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49194",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.896681
+    }
+  },
+  {
+    "timestamp": 1752099039.884309,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1604,
+      "time": 1499169251.896818
+    }
+  },
+  {
+    "timestamp": 1752099039.884354,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1604,
+      "time": 1499169251.896866
+    }
+  },
+  {
+    "timestamp": 1752099039.8844023,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49195",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.910515
+    }
+  },
+  {
+    "timestamp": 1752099039.8844492,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49195",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.910519
+    }
+  },
+  {
+    "timestamp": 1752099039.8844943,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 404,
+      "time": 1499169251.910812
+    }
+  },
+  {
+    "timestamp": 1752099039.8845382,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 404,
+      "time": 1499169251.910861
+    }
+  },
+  {
+    "timestamp": 1752099039.8845823,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49196",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.912116
+    }
+  },
+  {
+    "timestamp": 1752099039.8846297,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49196",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169251.91212
+    }
+  },
+  {
+    "timestamp": 1752099039.8846755,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1591,
+      "time": 1499169251.912399
+    }
+  },
+  {
+    "timestamp": 1752099039.88472,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1591,
+      "time": 1499169251.912446
+    }
+  },
+  {
+    "timestamp": 1752099039.884765,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1687,
+      "time": 1499169251.915087
+    }
+  },
+  {
+    "timestamp": 1752099039.8848119,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1687,
+      "time": 1499169251.915092
+    }
+  },
+  {
+    "timestamp": 1752099039.8848565,
+    "source_ip": "23.217.41.219",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49197",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169252.388735
+    }
+  },
+  {
+    "timestamp": 1752099039.8849037,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49198",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169252.50923
+    }
+  },
+  {
+    "timestamp": 1752099039.8849487,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49198",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169252.523191
+    }
+  },
+  {
+    "timestamp": 1752099039.8849957,
+    "source_ip": "104.88.60.48",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49199",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169252.696612
+    }
+  },
+  {
+    "timestamp": 1752099039.885043,
+    "source_ip": "23.52.146.130",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49200",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169252.867112
+    }
+  },
+  {
+    "timestamp": 1752099039.885093,
+    "source_ip": "23.202.233.152",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49201",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169253.088645
+    }
+  },
+  {
+    "timestamp": 1752099039.8851404,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49159",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169254.41175
+    }
+  },
+  {
+    "timestamp": 1752099039.8851855,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49159",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169254.411753
+    }
+  },
+  {
+    "timestamp": 1752099039.8852348,
+    "source_ip": "192.168.10.15",
+    "destination_ip": "64.4.54.254",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169300.027765
+    }
+  },
+  {
+    "timestamp": 1752099039.8852804,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "54.69.227.52",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169302.02913
+    }
+  },
+  {
+    "timestamp": 1752099039.8853242,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "72.21.91.29",
+    "destination_port": "80",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169302.211754
+    }
+  },
+  {
+    "timestamp": 1752099039.885365,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "52.84.145.75",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169302.393307
+    }
+  },
+  {
+    "timestamp": 1752099039.885407,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.9.228",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169303.715161
+    }
+  },
+  {
+    "timestamp": 1752099039.885452,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.6.206",
+    "destination_port": "80",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169303.799222
+    }
+  },
+  {
+    "timestamp": 1752099039.885494,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.9.228",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169303.83651
+    }
+  },
+  {
+    "timestamp": 1752099039.8855407,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.6.206",
+    "destination_port": "80",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169303.992398
+    }
+  },
+  {
+    "timestamp": 1752099039.8856106,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.10.131",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169304.150646
+    }
+  },
+  {
+    "timestamp": 1752099039.8856642,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.10.131",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169304.370142
+    }
+  },
+  {
+    "timestamp": 1752099039.8857234,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "65.55.252.93",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169304.570968
+    }
+  },
+  {
+    "timestamp": 1752099039.8857715,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.12.195",
+    "destination_port": "443",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169304.635044
+    }
+  },
+  {
+    "timestamp": 1752099039.8858345,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "134.170.30.202",
+    "destination_port": "80",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169304.767729
+    }
+  },
+  {
+    "timestamp": 1752099041.4742725,
+    "source_ip": "172.217.12.131",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49219",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169305.435831
+    }
+  },
+  {
+    "timestamp": 1752099041.4743414,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.12.131",
+    "destination_port": "443",
+    "protocol": "TLS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 492,
+      "time": 1499169305.506859
+    }
+  },
+  {
+    "timestamp": 1752099041.4743931,
+    "source_ip": "172.217.12.195",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49220",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169305.782025
+    }
+  },
+  {
+    "timestamp": 1752099041.4744415,
+    "source_ip": "134.170.30.202",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49221",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 62,
+      "time": 1499169306.209409
+    }
+  },
+  {
+    "timestamp": 1752099041.4744916,
+    "source_ip": "172.217.10.78",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49222",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169306.327796
+    }
+  },
+  {
+    "timestamp": 1752099041.47454,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.6.206",
+    "destination_port": "80",
+    "protocol": "OCSP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 487,
+      "time": 1499169306.390077
+    }
+  },
+  {
+    "timestamp": 1752099041.4745884,
+    "source_ip": "184.25.102.48",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49206",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169306.49921
+    }
+  },
+  {
+    "timestamp": 1752099041.4746356,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.10.131",
+    "destination_port": "443",
+    "protocol": "TLS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 551,
+      "time": 1499169306.526616
+    }
+  },
+  {
+    "timestamp": 1752099041.4746833,
+    "source_ip": "172.217.10.131",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49215",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169306.706919
+    }
+  },
+  {
+    "timestamp": 1752099041.4747298,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "172.217.10.131",
+    "destination_port": "443",
+    "protocol": "TLS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 667,
+      "time": 1499169306.971503
+    }
+  },
+  {
+    "timestamp": 1752099041.4747782,
+    "source_ip": "104.88.107.204",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49223",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169307.383229
+    }
+  },
+  {
+    "timestamp": 1752099041.4748242,
+    "source_ip": "198.41.215.185",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49224",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169307.678854
+    }
+  },
+  {
+    "timestamp": 1752099041.474874,
+    "source_ip": "23.15.4.9",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49226",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.587861
+    }
+  },
+  {
+    "timestamp": 1752099041.47492,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49225",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.58789
+    }
+  },
+  {
+    "timestamp": 1752099041.474965,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49228",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.587894
+    }
+  },
+  {
+    "timestamp": 1752099041.4750102,
+    "source_ip": "23.15.4.9",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49227",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.587897
+    }
+  },
+  {
+    "timestamp": 1752099041.475054,
+    "source_ip": "23.15.4.9",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49229",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.5879
+    }
+  },
+  {
+    "timestamp": 1752099041.47511,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49230",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.587912
+    }
+  },
+  {
+    "timestamp": 1752099041.4751554,
+    "source_ip": "23.15.4.9",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49231",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.587924
+    }
+  },
+  {
+    "timestamp": 1752099041.4752057,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49225",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.602266
+    }
+  },
+  {
+    "timestamp": 1752099041.475254,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49228",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.602267
+    }
+  },
+  {
+    "timestamp": 1752099041.4753053,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49230",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169309.602273
+    }
+  },
+  {
+    "timestamp": 1752099041.47535,
+    "source_ip": "23.15.4.19",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49230",
+    "protocol": "PNG",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1651,
+      "time": 1499169309.604753
+    }
+  },
+  {
+    "timestamp": 1752099041.4753976,
+    "source_ip": "172.217.10.131",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49215",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169310.706881
+    }
+  },
+  {
+    "timestamp": 1752099041.4754412,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49159",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169314.429125
+    }
+  },
+  {
+    "timestamp": 1752099041.4754841,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.5",
+    "destination_port": "49159",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169314.429128
+    }
+  },
+  {
+    "timestamp": 1752099041.4755309,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "131.253.34.240",
+    "destination_port": "443",
+    "protocol": "TLS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 555,
+      "time": 1499169323.772028
+    }
+  },
+  {
+    "timestamp": 1752099041.475575,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "131.253.34.240",
+    "destination_port": "443",
+    "protocol": "TLS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 939,
+      "time": 1499169323.772045
+    }
+  },
+  {
+    "timestamp": 1752099041.475639,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "Unknown",
+    "protocol": "DATA",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1514,
+      "time": 1499169381.735361
+    }
+  },
+  {
+    "timestamp": 1752099041.4756825,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "Unknown",
+    "protocol": "DATA",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1514,
+      "time": 1499169381.735366
+    }
+  },
+  {
+    "timestamp": 1752099041.4757252,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1679,
+      "time": 1499169381.737718
+    }
+  },
+  {
+    "timestamp": 1752099041.47577,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1679,
+      "time": 1499169381.737721
+    }
+  },
+  {
+    "timestamp": 1752099041.475822,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "Unknown",
+    "protocol": "DATA",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1514,
+      "time": 1499169381.75785
+    }
+  },
+  {
+    "timestamp": 1752099041.4758637,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "Unknown",
+    "protocol": "DATA",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1514,
+      "time": 1499169381.757855
+    }
+  },
+  {
+    "timestamp": 1752099043.3268278,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1679,
+      "time": 1499169381.760365
+    }
+  },
+  {
+    "timestamp": 1752099043.3269064,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1679,
+      "time": 1499169381.760368
+    }
+  },
+  {
+    "timestamp": 1752099043.3269603,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1403,
+      "time": 1499169381.762049
+    }
+  },
+  {
+    "timestamp": 1752099043.327011,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1403,
+      "time": 1499169381.762053
+    }
+  },
+  {
+    "timestamp": 1752099043.3270674,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169381.764189
+    }
+  },
+  {
+    "timestamp": 1752099043.32712,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169381.764193
+    }
+  },
+  {
+    "timestamp": 1752099043.327172,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.50",
+    "destination_port": "53570",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 382,
+      "time": 1499169381.764473
+    }
+  },
+  {
+    "timestamp": 1752099043.327222,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.50",
+    "destination_port": "53570",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 382,
+      "time": 1499169381.764477
+    }
+  },
+  {
+    "timestamp": 1752099043.3272789,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "3268",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169398.188606
+    }
+  },
+  {
+    "timestamp": 1752099043.32733,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "3268",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169398.18861
+    }
+  },
+  {
+    "timestamp": 1752099043.3273797,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169398.189633
+    }
+  },
+  {
+    "timestamp": 1752099043.3274295,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169398.189636
+    }
+  },
+  {
+    "timestamp": 1752099043.3274803,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1591,
+      "time": 1499169405.762276
+    }
+  },
+  {
+    "timestamp": 1752099043.3275318,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1591,
+      "time": 1499169405.762278
+    }
+  },
+  {
+    "timestamp": 1752099043.3275802,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1397,
+      "time": 1499169405.763664
+    }
+  },
+  {
+    "timestamp": 1752099043.3276355,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1397,
+      "time": 1499169405.763666
+    }
+  },
+  {
+    "timestamp": 1752099043.3276765,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1514,
+      "time": 1499169405.76424
+    }
+  },
+  {
+    "timestamp": 1752099043.327719,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 3049,
+      "time": 1499169405.764245
+    }
+  },
+  {
+    "timestamp": 1752099043.3277605,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1589,
+      "time": 1499169405.764248
+    }
+  },
+  {
+    "timestamp": 1752099043.327804,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "DCERPC",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 330,
+      "time": 1499169405.766291
+    }
+  },
+  {
+    "timestamp": 1752099043.3278515,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 330,
+      "time": 1499169405.76634
+    }
+  },
+  {
+    "timestamp": 1752099043.3279035,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "SAMR",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 290,
+      "time": 1499169405.766718
+    }
+  },
+  {
+    "timestamp": 1752099043.3279455,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 290,
+      "time": 1499169405.766767
+    }
+  },
+  {
+    "timestamp": 1752099043.327988,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "SAMR",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 282,
+      "time": 1499169405.767338
+    }
+  },
+  {
+    "timestamp": 1752099043.3280313,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 282,
+      "time": 1499169405.767387
+    }
+  },
+  {
+    "timestamp": 1752099043.3280728,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "SAMR",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 298,
+      "time": 1499169405.768285
+    }
+  },
+  {
+    "timestamp": 1752099043.3281145,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 298,
+      "time": 1499169405.768288
+    }
+  },
+  {
+    "timestamp": 1752099043.3281581,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "SAMR",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 390,
+      "time": 1499169405.770729
+    }
+  },
+  {
+    "timestamp": 1752099043.3282025,
+    "source_ip": "192.168.10.5",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 390,
+      "time": 1499169405.770731
+    }
+  },
+  {
+    "timestamp": 1752099044.9730897,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1033",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1572,
+      "time": 1499169429.891208
+    }
+  },
+  {
+    "timestamp": 1752099044.973172,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1033",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1572,
+      "time": 1499169429.891212
+    }
+  },
+  {
+    "timestamp": 1752099044.9732206,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1451,
+      "time": 1499169429.891588
+    }
+  },
+  {
+    "timestamp": 1752099044.9732738,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1451,
+      "time": 1499169429.89159
+    }
+  },
+  {
+    "timestamp": 1752099044.9733224,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1034",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1464,
+      "time": 1499169429.891882
+    }
+  },
+  {
+    "timestamp": 1752099044.9733717,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1034",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1464,
+      "time": 1499169429.891931
+    }
+  },
+  {
+    "timestamp": 1752099044.9734237,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1514,
+      "time": 1499169429.892431
+    }
+  },
+  {
+    "timestamp": 1752099044.9734735,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 3126,
+      "time": 1499169429.892482
+    }
+  },
+  {
+    "timestamp": 1752099044.97352,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "445",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1666,
+      "time": 1499169429.892485
+    }
+  },
+  {
+    "timestamp": 1752099044.9735694,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 404,
+      "time": 1499169429.97138
+    }
+  },
+  {
+    "timestamp": 1752099044.9736183,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 404,
+      "time": 1499169429.971428
+    }
+  },
+  {
+    "timestamp": 1752099044.9736662,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1035",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1514,
+      "time": 1499169429.971584
+    }
+  },
+  {
+    "timestamp": 1752099044.973717,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1035",
+    "protocol": "DATA",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 2688,
+      "time": 1499169429.971588
+    }
+  },
+  {
+    "timestamp": 1752099044.9737675,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1035",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1228,
+      "time": 1499169429.97159
+    }
+  },
+  {
+    "timestamp": 1752099044.9738228,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1619,
+      "time": 1499169429.973064
+    }
+  },
+  {
+    "timestamp": 1752099044.9738736,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1619,
+      "time": 1499169429.973112
+    }
+  },
+  {
+    "timestamp": 1752099044.9739242,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1036",
+    "protocol": "KERBEROS",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1578,
+      "time": 1499169429.973821
+    }
+  },
+  {
+    "timestamp": 1752099044.9739707,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1036",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1578,
+      "time": 1499169429.973826
+    }
+  },
+  {
+    "timestamp": 1752099044.9740195,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1726,
+      "time": 1499169429.974148
+    }
+  },
+  {
+    "timestamp": 1752099044.974072,
+    "source_ip": "192.168.10.9",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1726,
+      "time": 1499169429.974153
+    }
+  },
+  {
+    "timestamp": 1752099044.97414,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1029",
+    "protocol": "RPC_NETLOGON",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1006,
+      "time": 1499169430.898161
+    }
+  },
+  {
+    "timestamp": 1752099044.9741967,
+    "source_ip": "192.168.10.3",
+    "destination_ip": "192.168.10.9",
+    "destination_port": "1029",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1006,
+      "time": 1499169430.898164
+    }
+  },
+  {
+    "timestamp": 1752099044.9742522,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "3268",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169431.027499
+    }
+  },
+  {
+    "timestamp": 1752099044.9743037,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "3268",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169431.027503
+    }
+  },
+  {
+    "timestamp": 1752099044.9743521,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "LDAP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169431.028481
+    }
+  },
+  {
+    "timestamp": 1752099044.9744008,
+    "source_ip": "192.168.10.50",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 469,
+      "time": 1499169431.028485
+    }
+  },
+  {
+    "timestamp": 1752099044.9744642,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.581887
+    }
+  },
+  {
+    "timestamp": 1752099044.9745128,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.58189
+    }
+  },
+  {
+    "timestamp": 1752099044.9745631,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.61419
+    }
+  },
+  {
+    "timestamp": 1752099044.9746108,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.614193
+    }
+  },
+  {
+    "timestamp": 1752099044.9746583,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.615744
+    }
+  },
+  {
+    "timestamp": 1752099044.9747066,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.615746
+    }
+  },
+  {
+    "timestamp": 1752099044.9747536,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 1113,
+      "time": 1499169433.616655
+    }
+  },
+  {
+    "timestamp": 1752099044.9748025,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.630885
+    }
+  },
+  {
+    "timestamp": 1752099044.9748507,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.630888
+    }
+  },
+  {
+    "timestamp": 1752099044.9748974,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.643303
+    }
+  },
+  {
+    "timestamp": 1752099044.9749472,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "389",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.643306
+    }
+  },
+  {
+    "timestamp": 1752099044.9749966,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.672886
+    }
+  },
+  {
+    "timestamp": 1752099044.975043,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.67289
+    }
+  },
+  {
+    "timestamp": 1752099044.9750903,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.691872
+    }
+  },
+  {
+    "timestamp": 1752099044.9751341,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.691876
+    }
+  },
+  {
+    "timestamp": 1752099044.975182,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.69433
+    }
+  },
+  {
+    "timestamp": 1752099044.975227,
+    "source_ip": "192.168.10.8",
+    "destination_ip": "192.168.10.3",
+    "destination_port": "88",
+    "protocol": "TCP",
+    "confidence": 1.0,
+    "packet_info": {
+      "length": 66,
+      "time": 1499169433.694333
+    }
+  }
+]

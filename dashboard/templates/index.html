@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Network Intrusion Detection System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            padding-top: 20px;
+            background-color: #f8f9fa;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .card-header {
+            font-weight: bold;
+            background-color: #f1f5f9;
+        }
+        .alert-card {
+            border-left: 4px solid #dc3545;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .status-idle {
+            background-color: #6c757d;
+        }
+        .status-running {
+            background-color: #28a745;
+            animation: pulse 1.5s infinite;
+        }
+        .status-error {
+            background-color: #dc3545;
+        }
+        .status-degraded {
+            background-color: #ffc107;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+        .detection-controls {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .table-alerts th {
+            position: sticky;
+            top: 0;
+            background-color: #fff;
+            z-index: 10;
+        }
+        .alert-high {
+            background-color: rgba(220,53,69,0.1);
+        }
+        .alert-medium {
+            background-color: rgba(255,193,7,0.1);
+        }
+        .alert-low {
+            background-color: rgba(13,202,240,0.1);
+        }
+        .model-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .health-indicator {
+            font-size: 16px;
+            margin-left: 10px;
+        }
+        .model-status-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="pb-3 mb-4 border-bottom">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-shield-alt fs-2 me-3 text-primary"></i>
+                <span class="fs-4">AI-Powered Network Intrusion Detection System</span>
+                
+                <div class="ms-auto d-flex align-items-center">
+                    <div id="system-status-indicator">
+                        <span class="status-indicator status-idle" id="status-light"></span>
+                        <span id="status-text">Idle</span>
+                        <span id="health-indicator" class="health-indicator"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Model Status & Validation Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-cogs me-2"></i> Model Status & Validation
+                        <button class="btn btn-sm btn-outline-primary ms-2" id="validate-features-btn">
+                            <i class="fas fa-check-circle me-1"></i> Validate Features
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row" id="model-status-section">
+                            <div class="col-md-6">
+                                <div class="model-status-section">
+                                    <h6><i class="fas fa-brain me-2"></i>XGBoost Model Status</h6>
+                                    <div id="xgboost-status">Loading...</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="model-status-section">
+                                    <h6><i class="fas fa-network-wired me-2"></i>BiLSTM Model Status</h6>
+                                    <div id="bilstm-status">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="model-status-section">
+                                    <h6><i class="fas fa-info-circle me-2"></i>System Information</h6>
+                                    <div id="system-info">
+                                        <span class="badge bg-info">Flow-based Feature Extraction</span>
+                                        <span class="badge bg-secondary" id="feature-count-badge">53 Features</span>
+                                        <span class="badge bg-success" id="detection-method-badge">Real-time Detection</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detection Controls -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-cogs me-2"></i> Detection Controls
+                    </div>
+                    <div class="card-body detection-controls">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Live Network Monitoring</h5>
+                                <div class="mb-3">
+                                    <label for="interface-select" class="form-label">Network Interface</label>
+                                    <select class="form-select" id="interface-select">
+                                        <!-- Will be populated from API -->
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="model-select" class="form-label">Detection Model</label>
+                                    <select class="form-select" id="model-select">
+                                        <option value="xgboost">XGBoost (Fast, Flow-based)</option>
+                                        <option value="bilstm">BiLSTM (Deep Learning, Flow-based)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="duration-input" class="form-label">Duration (seconds)</label>
+                                    <input type="number" class="form-control" id="duration-input" value="60" min="10" max="3600">
+                                </div>
+                                <button id="start-detection-btn" class="btn btn-primary me-2">
+                                    <i class="fas fa-play me-1"></i> Start Monitoring
+                                </button>
+                                <button id="stop-detection-btn" class="btn btn-danger" disabled>
+                                    <i class="fas fa-stop me-1"></i> Stop
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>PCAP File Analysis</h5>
+                                <div class="mb-3">
+                                    <label for="pcap-select" class="form-label">Select PCAP File</label>
+                                    <select class="form-select" id="pcap-select">
+                                        <!-- Will be populated from API -->
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="pcap-model-select" class="form-label">Detection Model</label>
+                                    <select class="form-select" id="pcap-model-select">
+                                        <option value="xgboost">XGBoost (Fast, Flow-based)</option>
+                                        <option value="bilstm">BiLSTM (Deep Learning, Flow-based)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="max-packets" class="form-label">Max Packets to Analyze</label>
+                                    <input type="number" class="form-control" id="max-packets" value="5000" min="100" max="50000">
+                                </div>
+                                <button id="analyze-pcap-btn" class="btn btn-success">
+                                    <i class="fas fa-search me-1"></i> Analyze PCAP
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats and Charts Row -->
+        <div class="row mb-4">
+            <!-- Key Stats -->
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie me-2"></i> Key Statistics
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-4">
+                                <div class="stat-value" id="total-packets">0</div>
+                                <div class="stat-label">Packets Analyzed</div>
+                            </div>
+                            <div class="col-6 mb-4">
+                                <div class="stat-value" id="total-alerts">0</div>
+                                <div class="stat-label">Alerts Generated</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-value" id="alert-rate">0%</div>
+                                <div class="stat-label">Alert Rate</div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-value" id="elapsed-time">0s</div>
+                                <div class="stat-label">Processing Time</div>
+                            </div>
+                        </div>
+                        <div class="row text-center mt-3">
+                            <div class="col-12">
+                                <small class="text-muted" id="confidence-stats">Confidence: Min 0% | Max 0% | Avg 0%</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Protocol Distribution -->
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="fas fa-sitemap me-2"></i> Protocol Distribution
+                    </div>
+                    <div class="card-body">
+                        <canvas id="protocol-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Alert Time Distribution -->
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="fas fa-clock me-2"></i> Alert Time Distribution
+                    </div>
+                    <div class="card-body">
+                        <canvas id="time-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Table -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-exclamation-triangle me-2"></i> Recent Alerts
+                        </div>
+                        <div>
+                            <div class="btn-group" role="group">
+                                <input type="range" class="form-range me-2" id="confidence-filter" min="0" max="100" value="0" style="width: 100px;">
+                                <small class="text-muted me-2">Min Confidence: <span id="confidence-value">0%</span></small>
+                                <button class="btn btn-sm btn-outline-secondary refresh-alerts-btn">
+                                    <i class="fas fa-sync-alt me-1"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-hover table-striped mb-0 table-alerts">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>Source IP</th>
+                                        <th>Destination IP</th>
+                                        <th>Port</th>
+                                        <th>Protocol</th>
+                                        <th>Confidence & Severity</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alerts-body">
+                                    <tr>
+                                        <td colspan="6" class="text-center py-3">Loading alerts...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Information -->
+        <div class="row mb-4" id="model-info-cards">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-brain me-2"></i> XGBoost Model
+                        <span class="badge bg-success model-badge" id="xgboost-badge">Loading...</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-group" id="xgboost-metrics">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Accuracy
+                                        <span class="badge bg-primary rounded-pill">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Precision
+                                        <span class="badge bg-primary rounded-pill">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Recall
+                                        <span class="badge bg-primary rounded-pill">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        F1 Score
+                                        <span class="badge bg-primary rounded-pill">Loading...</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-center">
+                                    <i class="fas fa-tachometer-alt mb-2" style="font-size: 2em; color: #0d6efd;"></i>
+                                    <h5>Fast Inference</h5>
+                                    <p class="text-muted small">Flow-based Detection</p>
+                                    <p class="text-muted small" id="xgboost-model-info">Model Status: Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-network-wired me-2"></i> BiLSTM Model
+                        <span class="badge bg-primary model-badge" id="bilstm-badge">Loading...</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-group" id="bilstm-metrics">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Accuracy
+                                        <span class="badge bg-primary rounded-pill">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Precision
+                                        <span class="badge bg-primary rounded-pill">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Recall
+                                        <span class="badge bg-primary rounded-pill">Loading...</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        F1 Score
+                                        <span class="badge bg-primary rounded-pill">Loading...</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="text-center">
+                                    <i class="fas fa-microchip mb-2" style="font-size: 2em; color: #0d6efd;"></i>
+                                    <h5>Deep Learning</h5>
+                                    <p class="text-muted small">Flow-based Detection</p>
+                                    <p class="text-muted small" id="bilstm-model-info">Model Status: Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>AI-Powered Network Intrusion Detection System - Graduation Thesis Project</p>
+            <p><small>Enhanced with Flow-based Feature Extraction and Corrected Models</small></p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Main Dashboard JavaScript -->
+    <script>
+        // Initialize charts
+        const protocolChart = new Chart(
+            document.getElementById('protocol-chart'),
+            {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: [
+                            '#0d6efd', '#6610f2', '#6f42c1', '#d63384', 
+                            '#dc3545', '#fd7e14', '#ffc107', '#198754'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+        const timeChart = new Chart(
+            document.getElementById('time-chart'),
+            {
+                type: 'bar',
+                data: {
+                    labels: Array.from({length: 24}, (_, i) => i),
+                    datasets: [{
+                        label: 'Alerts by Hour',
+                        data: Array(24).fill(0),
+                        backgroundColor: '#0d6efd'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Hour of Day'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        );
+
+        // Global state
+        let isMonitoring = false;
+        let statsUpdateInterval = null;
+        let currentMinConfidence = 0;
+
+        // Helper functions
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp * 1000);
+            return date.toLocaleString();
+        }
+
+        function getSeverityFromConfidence(confidence) {
+            if (confidence >= 0.8) return 'High';
+            if (confidence >= 0.5) return 'Medium';
+            if (confidence >= 0.3) return 'Low';
+            return 'Info';
+        }
+
+        function getSeverityBadge(severity) {
+            const badges = {
+                'High': '<span class="badge bg-danger">High</span>',
+                'Medium': '<span class="badge bg-warning">Medium</span>',
+                'Low': '<span class="badge bg-info">Low</span>',
+                'Info': '<span class="badge bg-secondary">Info</span>'
+            };
+            return badges[severity] || badges['Info'];
+        }
+
+        function updateStatusIndicator(status) {
+            const statusLight = document.getElementById('status-light');
+            const statusText = document.getElementById('status-text');
+            
+            statusLight.className = 'status-indicator';
+            
+            let statusDetails = status.status || 'idle';
+            
+            // Add model version and feature extraction info
+            if (status.model_version) {
+                statusDetails += ` (${status.model_version} model)`;
+            }
+            if (status.feature_extraction) {
+                statusDetails += ` - ${status.feature_extraction}`;
+            }
+            
+            if (status.status === 'running' || status.status === 'analyzing_pcap') {
+                statusLight.classList.add('status-running');
+                statusText.textContent = status.status === 'running' ? 'Running' : 'Analyzing PCAP';
+            } else if (status.status && status.status.startsWith('error')) {
+                statusLight.classList.add('status-error');
+                statusText.textContent = 'Error';
+            } else {
+                statusLight.classList.add('status-idle');
+                statusText.textContent = 'Idle';
+            }
+        }
+
+        function updateSystemHealthIndicator(health) {
+            const healthIndicator = document.getElementById('health-indicator');
+            
+            if (health.status === 'healthy') {
+                healthIndicator.innerHTML = '<i class="fas fa-check-circle text-success" title="System Healthy"></i>';
+            } else if (health.status === 'degraded') {
+                healthIndicator.innerHTML = '<i class="fas fa-exclamation-triangle text-warning" title="System Degraded"></i>';
+            } else {
+                healthIndicator.innerHTML = '<i class="fas fa-times-circle text-danger" title="System Unhealthy"></i>';
+            }
+        }
+
+        function updateModelCards(modelInfo) {
+            // Update XGBoost card
+            if (modelInfo.xgboost) {
+                const validation = modelInfo.xgboost.validation;
+                const metrics = modelInfo.xgboost.metrics;
+                const badge = document.getElementById('xgboost-badge');
+                const statusDiv = document.getElementById('xgboost-status');
+                const modelInfoDiv = document.getElementById('xgboost-model-info');
+                
+                if (validation.status === 'corrected_ready') {
+                    badge.className = 'badge bg-success model-badge';
+                    badge.textContent = 'Corrected Model Ready';
+                    statusDiv.innerHTML = '<span class="badge bg-success">✓ Corrected Model</span> <span class="badge bg-info">Flow-based</span>';
+                    modelInfoDiv.textContent = 'Corrected flow-based model loaded';
+                } else if (validation.status === 'fallback_available') {
+                    badge.className = 'badge bg-warning model-badge';
+                    badge.textContent = 'Fallback Model';
+                    statusDiv.innerHTML = '<span class="badge bg-warning">⚠ Fallback Model</span>';
+                    modelInfoDiv.textContent = 'Using fallback model';
+                } else {
+                    badge.className = 'badge bg-danger model-badge';
+                    badge.textContent = 'Model Issues';
+                    statusDiv.innerHTML = '<span class="badge bg-danger">✗ Model Issues</span>';
+                    modelInfoDiv.textContent = 'Model validation failed';
+                }
+                
+                // Update metrics
+                const metricsContainer = document.getElementById('xgboost-metrics');
+                metricsContainer.innerHTML = `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Accuracy
+                        <span class="badge bg-primary rounded-pill">${(metrics.accuracy * 100).toFixed(2)}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Precision
+                        <span class="badge bg-primary rounded-pill">${(metrics.precision * 100).toFixed(2)}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Recall
+                        <span class="badge bg-primary rounded-pill">${(metrics.recall * 100).toFixed(2)}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        F1 Score
+                        <span class="badge bg-primary rounded-pill">${(metrics.f1_score * 100).toFixed(2)}%</span>
+                    </li>
+                `;
+            }
+            
+            // Update BiLSTM card
+            if (modelInfo.bilstm) {
+                const validation = modelInfo.bilstm.validation;
+                const metrics = modelInfo.bilstm.metrics;
+                const badge = document.getElementById('bilstm-badge');
+                const statusDiv = document.getElementById('bilstm-status');
+                const modelInfoDiv = document.getElementById('bilstm-model-info');
+                
+                if (validation.status === 'corrected_ready') {
+                    badge.className = 'badge bg-success model-badge';
+                    badge.textContent = 'Corrected Model Ready';
+                    statusDiv.innerHTML = '<span class="badge bg-success">✓ Corrected Model</span> <span class="badge bg-info">Flow-based</span>';
+                    modelInfoDiv.textContent = 'Corrected flow-based model loaded';
+                } else if (validation.status === 'fallback_available') {
+                    badge.className = 'badge bg-warning model-badge';
+                    badge.textContent = 'Fallback Model';
+                    statusDiv.innerHTML = '<span class="badge bg-warning">⚠ Fallback Model</span>';
+                    modelInfoDiv.textContent = 'Using fallback model';
+                } else {
+                    badge.className = 'badge bg-danger model-badge';
+                    badge.textContent = 'Model Issues';
+                    statusDiv.innerHTML = '<span class="badge bg-danger">✗ Model Issues</span>';
+                    modelInfoDiv.textContent = 'Model validation failed';
+                }
+                
+                // Update metrics
+                const metricsContainer = document.getElementById('bilstm-metrics');
+                metricsContainer.innerHTML = `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Accuracy
+                        <span class="badge bg-primary rounded-pill">${(metrics.accuracy * 100).toFixed(2)}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Precision
+                        <span class="badge bg-primary rounded-pill">${(metrics.precision * 100).toFixed(2)}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Recall
+                        <span class="badge bg-primary rounded-pill">${(metrics.recall * 100).toFixed(2)}%</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        F1 Score
+                        <span class="badge bg-primary rounded-pill">${(metrics.f1_score * 100).toFixed(2)}%</span>
+                    </li>
+                `;
+            }
+        }
+
+        // API functions
+        async function fetchModelInfo() {
+            try {
+                const response = await fetch('/api/model_info');
+                const modelInfo = await response.json();
+                updateModelCards(modelInfo);
+            } catch (error) {
+                console.error('Error fetching model info:', error);
+            }
+        }
+
+        async function fetchSystemHealth() {
+            try {
+                const response = await fetch('/api/system_health');
+                const health = await response.json();
+                updateSystemHealthIndicator(health);
+            } catch (error) {
+                console.error('Error fetching system health:', error);
+            }
+        }
+
+        async function validateFeatures() {
+            const model = document.getElementById('model-select').value;
+            
+            try {
+                const response = await fetch('/api/validate_features', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ model_type: model })
+                });
+                
+                const validation = await response.json();
+                
+                // Show validation results
+                const alertType = validation.status === 'ready' ? 'success' : 'warning';
+                const message = validation.status === 'ready' 
+                    ? `✓ Feature validation successful for ${model.toUpperCase()}` 
+                    : `⚠ Feature validation issues for ${model.toUpperCase()}: ${validation.error || 'Unknown error'}`;
+                
+                // Create temporary alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${alertType} alert-dismissible fade show`;
+                alertDiv.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                
+                document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 5000);
+                
+            } catch (error) {
+                console.error('Error validating features:', error);
+            }
+        }
+
+        async function fetchAlerts() {
+            try {
+                const minConfidence = currentMinConfidence / 100;
+                const response = await fetch(`/api/alerts?limit=50&min_confidence=${minConfidence}`);
+                const alerts = await response.json();
+                
+                const alertsBody = document.getElementById('alerts-body');
+                
+                if (alerts.length === 0) {
+                    alertsBody.innerHTML = '<tr><td colspan="6" class="text-center py-3">No alerts found</td></tr>';
+                    return;
+                }
+                
+                alertsBody.innerHTML = alerts.map(alert => {
+                    const confidence = parseFloat(alert.confidence || 0);
+                    const severity = alert.severity || getSeverityFromConfidence(confidence);
+                    const severityBadge = getSeverityBadge(severity);
+                    
+                    let rowClass = '';
+                    switch(severity) {
+                        case 'High':
+                            rowClass = 'alert-high';
+                            break;
+                        case 'Medium':
+                            rowClass = 'alert-medium';
+                            break;
+                        case 'Low':
+                            rowClass = 'alert-low';
+                            break;
+                    }
+                    
+                    return `
+                        <tr class="${rowClass}">
+                            <td>${formatDateTime(alert.timestamp)}</td>
+                            <td>${alert.source_ip}</td>
+                            <td>${alert.destination_ip}</td>
+                            <td>${alert.destination_port}</td>
+                            <td>${alert.protocol}</td>
+                            <td>${(confidence * 100).toFixed(1)}% ${severityBadge}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error fetching alerts:', error);
+            }
+        }
+
+        async function fetchStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const status = await response.json();
+                
+                updateStatusIndicator(status);
+                
+                // Update stats
+                document.getElementById('total-packets').textContent = status.total_packets || 0;
+                document.getElementById('total-alerts').textContent = status.alert_count || 0;
+                
+                if (status.total_packets > 0) {
+                    const alertRate = ((status.alert_count / status.total_packets) * 100).toFixed(2);
+                    document.getElementById('alert-rate').textContent = `${alertRate}%`;
+                }
+                
+                if (status.processing_time) {
+                    document.getElementById('elapsed-time').textContent = `${status.processing_time.toFixed(1)}s`;
+                } else if (status.elapsed_seconds) {
+                    document.getElementById('elapsed-time').textContent = `${status.elapsed_seconds}s`;
+                }
+                
+                // Update buttons based on monitoring state
+                isMonitoring = status.is_monitoring;
+                document.getElementById('start-detection-btn').disabled = isMonitoring;
+                document.getElementById('stop-detection-btn').disabled = !isMonitoring;
+                document.getElementById('analyze-pcap-btn').disabled = isMonitoring;
+                
+                return status;
+            } catch (error) {
+                console.error('Error fetching status:', error);
+                return null;
+            }
+        }
+
+        async function fetchStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                
+                // Update protocol chart
+                const protocols = stats.alert_types || {};
+                protocolChart.data.labels = Object.keys(protocols);
+                protocolChart.data.datasets[0].data = Object.values(protocols);
+                protocolChart.update();
+                
+                // Update time chart
+                const hourly = stats.hourly_distribution || {};
+                timeChart.data.datasets[0].data = Object.values(hourly);
+                timeChart.update();
+                
+                // Update confidence statistics
+                if (stats.confidence_stats) {
+                    const confStats = stats.confidence_stats;
+                    document.getElementById('confidence-stats').textContent = 
+                        `Confidence: Min ${(confStats.min * 100).toFixed(1)}% | Max ${(confStats.max * 100).toFixed(1)}% | Avg ${(confStats.mean * 100).toFixed(1)}%`;
+                }
+                
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+
+        async function fetchInterfaces() {
+            try {
+                const response = await fetch('/api/status');
+                const status = await response.json();
+                
+                const interfaceSelect = document.getElementById('interface-select');
+                interfaceSelect.innerHTML = '';
+                
+                // Add common interfaces
+                const interfaces = ['wlan0', 'eth0', 'lo'];
+                interfaces.forEach(iface => {
+                    const option = document.createElement('option');
+                    option.value = iface;
+                    option.textContent = iface;
+                    if (iface === 'lo') option.selected = true; // Default to loopback for testing
+                    interfaceSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching interfaces:', error);
+            }
+        }
+
+        async function fetchPcapFiles() {
+            try {
+                const response = await fetch('/api/pcap_list');
+                const pcapFiles = await response.json();
+                
+                const pcapSelect = document.getElementById('pcap-select');
+                pcapSelect.innerHTML = '';
+                
+                if (pcapFiles.length === 0) {
+                    const option = document.createElement('option');
+                    option.textContent = 'No PCAP files found';
+                    pcapSelect.appendChild(option);
+                    return;
+                }
+                
+                pcapFiles.forEach(file => {
+                    const option = document.createElement('option');
+                    option.value = file.path;
+                    option.textContent = `${file.name} (${file.size_mb} MB)`;
+                    pcapSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching PCAP files:', error);
+            }
+        }
+
+        async function startDetection() {
+            const interface = document.getElementById('interface-select').value;
+            const model = document.getElementById('model-select').value;
+            const duration = parseInt(document.getElementById('duration-input').value);
+            
+            try {
+                const response = await fetch('/api/start_detection', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        interface,
+                        model_type: model,
+                        duration
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Start status polling more frequently
+                    if (statsUpdateInterval) clearInterval(statsUpdateInterval);
+                    statsUpdateInterval = setInterval(updateDashboard, 1000);
+                } else {
+                    console.error('Detection start failed:', result.message);
+                }
+                
+                await updateDashboard();
+            } catch (error) {
+                console.error('Error starting detection:', error);
+            }
+        }
+
+        async function stopDetection() {
+            try {
+                const response = await fetch('/api/stop_detection', {
+                    method: 'POST'
+                });
+                
+                await updateDashboard();
+                
+                // Reset polling to normal frequency
+                if (statsUpdateInterval) clearInterval(statsUpdateInterval);
+                statsUpdateInterval = setInterval(updateDashboard, 5000);
+            } catch (error) {
+                console.error('Error stopping detection:', error);
+            }
+        }
+
+        async function analyzePcap() {
+            const pcapPath = document.getElementById('pcap-select').value;
+            const model = document.getElementById('pcap-model-select').value;
+            const maxPackets = parseInt(document.getElementById('max-packets').value);
+            
+            try {
+                const response = await fetch('/api/analyze_pcap', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        pcap_path: pcapPath,
+                        model_type: model,
+                        max_packets: maxPackets
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Start status polling more frequently
+                    if (statsUpdateInterval) clearInterval(statsUpdateInterval);
+                    statsUpdateInterval = setInterval(updateDashboard, 1000);
+                } else {
+                    console.error('PCAP analysis failed:', result.message);
+                }
+                
+                await updateDashboard();
+            } catch (error) {
+                console.error('Error analyzing PCAP:', error);
+            }
+        }
+
+        // Dashboard update function
+        async function updateDashboard() {
+            const status = await fetchStatus();
+            await fetchAlerts();
+            await fetchStats();
+            
+            if (status && !status.is_monitoring && statsUpdateInterval) {
+                // If monitoring is done, reset polling interval
+                clearInterval(statsUpdateInterval);
+                statsUpdateInterval = setInterval(updateDashboard, 5000);
+            }
+        }
+
+        // Initial setup and event listeners
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Initial data load
+            await fetchInterfaces();
+            await fetchPcapFiles();
+            await fetchModelInfo();
+            await fetchSystemHealth();
+            await updateDashboard();
+            
+            // Set up event listeners
+            document.getElementById('start-detection-btn').addEventListener('click', startDetection);
+            document.getElementById('stop-detection-btn').addEventListener('click', stopDetection);
+            document.getElementById('analyze-pcap-btn').addEventListener('click', analyzePcap);
+            document.querySelector('.refresh-alerts-btn').addEventListener('click', fetchAlerts);
+            document.getElementById('validate-features-btn').addEventListener('click', validateFeatures);
+            
+            // Confidence filter
+            const confidenceFilter = document.getElementById('confidence-filter');
+            const confidenceValue = document.getElementById('confidence-value');
+            
+            confidenceFilter.addEventListener('input', (e) => {
+                currentMinConfidence = parseInt(e.target.value);
+                confidenceValue.textContent = `${currentMinConfidence}%`;
+                fetchAlerts(); // Refresh alerts with new filter
+            });
+            
+            // Set up regular polling
+            setInterval(updateDashboard, 5000);
+            setInterval(fetchSystemHealth, 30000); // Check system health every 30 seconds
+            setInterval(fetchModelInfo, 60000); // Update model info every minute
+        });
+    </script>
+</body>
+</html>

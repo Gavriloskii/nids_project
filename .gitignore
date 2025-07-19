@@ -1,0 +1,24 @@
+echo "# Virtual environments
+venv/
+venv_tf/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment files
+.env
+.vscode/
+
+# Log files
+*.log
+
+# Large model files (consider using Git LFS)
+sklearn
+
+# Capture files
+*.pcap
+temp_capture.pcap
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/" > .gitignore
