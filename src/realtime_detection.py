@@ -13,7 +13,6 @@ import xgboost as xgb
 from sklearn.preprocessing import StandardScaler
 from tensorflow.keras.models import load_model
 
-
 class NetworkIntrusionDetector:
     """
     Flow-based Network Intrusion Detection System supporting XGBoost and BiLSTM models.
@@ -25,6 +24,7 @@ class NetworkIntrusionDetector:
     - Batch processing for optimal performance
     - Comprehensive alert generation and persistence
     - Production-optimized thresholds based on extensive testing
+    - Proper stop signal handling and resource cleanup
     """
 
     # PRODUCTION-OPTIMIZED THRESHOLDS (Based on comprehensive testing)
@@ -54,6 +54,8 @@ class NetworkIntrusionDetector:
         """
         self.interface = interface
         self.model_type = model_type.lower()
+        
+        # Load models and scaler
         self.model = self._load_model()
         self.scaler = self._load_scaler()
         
@@ -79,22 +81,39 @@ class NetworkIntrusionDetector:
             'flows_processed': 0
         }
         
-        # Runtime state
+        # Runtime state with proper stop handling
         self.packet_count = 0
         self.start_time = None
         self.capture_active = False
+        self.stop_requested = False
         self.alerts = []
+        self.capture = None
+        
+        # Required features list (cached for performance)
+        self._required_features = self._get_required_features()
+
+    def stop_detection(self):
+        """Stop the current detection process gracefully."""
+        print("🛑 Stop signal received...")
+        self.stop_requested = True
+        self.capture_active = False
+        
+        # Close capture if active
+        if self.capture:
+            try:
+                self.capture.close()
+            except Exception:
+                pass
+        
+        # Force completion of remaining flows
+        if hasattr(self, 'flows') and self.flows:
+            print("🔄 Force completing remaining flows...")
+            completed_flows = self.get_completed_flows(force_completion=True)
+            return len(completed_flows)
+        return 0
 
     def _get_optimal_threshold(self, user_threshold: Optional[float] = None) -> float:
-        """
-        Get the optimal threshold based on production testing results.
-        
-        Parameters:
-        - user_threshold: User-specified threshold (overrides optimal values)
-        
-        Returns:
-        - Optimized threshold value
-        """
+        """Get the optimal threshold based on production testing results."""
         if user_threshold is not None:
             print(f"⚠️  Using user-specified threshold: {user_threshold}")
             print(f"   (Production-optimized threshold for {self.model_type}: {self.OPTIMAL_THRESHOLDS[self.model_type]['threshold']})")
@@ -115,44 +134,48 @@ class NetworkIntrusionDetector:
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
         if self.model_type == 'xgboost':
-            # Prioritize corrected model (99.74% accuracy) over original
             model_paths = [
-                os.path.join(project_root, 'models', 'xgboost', 'xgboost_model_corrected.json'),  # Production model
-                os.path.join(project_root, 'models', 'xgboost', 'xgboost_model.json')             # Fallback
+                os.path.join(project_root, 'models', 'xgboost', 'xgboost_model_corrected.json'),
+                os.path.join(project_root, 'models', 'xgboost', 'xgboost_model.json')
             ]
             
             model = xgb.XGBClassifier()
             for model_path in model_paths:
                 if os.path.exists(model_path):
-                    model.load_model(model_path)
-                    print(f"✅ XGBoost model loaded from: {model_path}")
-                    print(f"   Model feature count: {model.n_features_in_}")
-                    if hasattr(model, 'feature_importances_'):
-                        top_features = sorted(
-                            enumerate(model.feature_importances_), 
-                            key=lambda x: x[1], reverse=True
-                        )[:5]
-                        print(f"   Top 5 important features: {top_features}")
-                    return model
+                    try:
+                        model.load_model(model_path)
+                        print(f"✅ XGBoost model loaded from: {model_path}")
+                        print(f"   Model feature count: {model.n_features_in_}")
+                        if hasattr(model, 'feature_importances_'):
+                            top_features = sorted(
+                                enumerate(model.feature_importances_), 
+                                key=lambda x: x[1], reverse=True
+                            )[:5]
+                            print(f"   Top 5 important features: {top_features}")
+                        return model
+                    except Exception as e:
+                        print(f"⚠️  Failed to load {model_path}: {e}")
+                        continue
             
-            raise FileNotFoundError("❌ No XGBoost model file found")
+            raise FileNotFoundError("❌ No XGBoost model file found or could be loaded")
             
         elif self.model_type == 'bilstm':
-            # Prioritize corrected model (94.15% accuracy) over original  
             model_paths = [
-                os.path.join(project_root, 'models', 'bilstm', 'bilstm_model_corrected.h5'),  # Production model
-                os.path.join(project_root, 'models', 'bilstm', 'bilstm_model.h5')           # Fallback
+                os.path.join(project_root, 'models', 'bilstm', 'bilstm_model_corrected.h5'),
+                os.path.join(project_root, 'models', 'bilstm', 'bilstm_model.h5')
             ]
             
             for model_path in model_paths:
                 if os.path.exists(model_path):
-                    model = load_model(model_path)
-                    print(f"✅ BiLSTM model loaded from: {model_path}")
-                    print("   BiLSTM Model Summary:")
-                    model.summary()
-                    return model
+                    try:
+                        model = load_model(model_path)
+                        print(f"✅ BiLSTM model loaded from: {model_path}")
+                        return model
+                    except Exception as e:
+                        print(f"⚠️  Failed to load {model_path}: {e}")
+                        continue
             
-            raise FileNotFoundError("❌ No BiLSTM model file found")
+            raise FileNotFoundError("❌ No BiLSTM model file found or could be loaded")
         
         else:
             raise ValueError(f"❌ Unsupported model type: {self.model_type}")
@@ -161,31 +184,28 @@ class NetworkIntrusionDetector:
         """Load the saved StandardScaler from training."""
         project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         
-        # Prioritize the scaler from preprocessing (matches training data exactly)
         scaler_paths = [
-            os.path.join(project_root, 'data', 'preprocessed_csv', 'scaler.pkl'),  # Primary source
-            os.path.join(project_root, 'models', 'xgboost', 'scaler.pkl'),         # XGBoost backup
-            os.path.join(project_root, 'models', 'bilstm', 'scaler.pkl'),          # BiLSTM backup
-            os.path.join(project_root, 'models', 'scaler.pkl'),                    # Legacy backup
+            os.path.join(project_root, 'data', 'preprocessed_csv', 'scaler.pkl'),
+            os.path.join(project_root, 'models', 'xgboost', 'scaler.pkl'),
+            os.path.join(project_root, 'models', 'bilstm', 'scaler.pkl'),
+            os.path.join(project_root, 'models', 'scaler.pkl'),
         ]
         
         for scaler_path in scaler_paths:
             if os.path.exists(scaler_path):
-                scaler = joblib.load(scaler_path)
-                print(f"✅ Scaler loaded from: {scaler_path}")
-                return scaler
+                try:
+                    scaler = joblib.load(scaler_path)
+                    print(f"✅ Scaler loaded from: {scaler_path}")
+                    return scaler
+                except Exception as e:
+                    print(f"⚠️  Failed to load scaler from {scaler_path}: {e}")
+                    continue
         
-        print("❌ Warning: No saved scaler found. This may cause prediction issues!")
+        print("❌ Warning: No saved scaler found. Using default StandardScaler!")
         return StandardScaler()
 
     def get_flow_key(self, packet) -> Tuple[Optional[Tuple], Optional[str]]:
-        """
-        Generate unique flow identifier for bidirectional flow tracking.
-        
-        Returns:
-        - flow_key: Tuple identifying the bidirectional flow
-        - direction: 'forward' or 'backward'
-        """
+        """Generate unique flow identifier for bidirectional flow tracking."""
         try:
             if not hasattr(packet, 'ip'):
                 return None, None
@@ -236,75 +256,83 @@ class NetworkIntrusionDetector:
         if flow_key is None:
             return None
         
-        current_time = float(packet.sniff_timestamp)
-        packet_length = int(getattr(packet, 'length', 0))
-        
-        # Initialize flow if new
-        if flow_key not in self.flows:
-            self.flows[flow_key] = {
-                'start_time': current_time,
-                'last_time': current_time,
-                'fwd_packets': 0,
-                'bwd_packets': 0,
-                'fwd_bytes': 0,
-                'bwd_bytes': 0,
-                'fwd_lengths': [],
-                'bwd_lengths': [],
-                'timestamps': [],
-                'tcp_flags': defaultdict(int),
-                'fwd_header_lengths': [],
-                'bwd_header_lengths': [],
-                'packets': [],
-                'endpoints': (flow_key[0], flow_key[1])  # Store endpoints for port extraction
-            }
-        
-        flow = self.flows[flow_key]
-        flow['last_time'] = current_time
-        flow['timestamps'].append(current_time)
-        
-        # Update direction-specific statistics
-        if direction == 'forward':
-            flow['fwd_packets'] += 1
-            flow['fwd_bytes'] += packet_length
-            flow['fwd_lengths'].append(packet_length)
-            if hasattr(packet, 'tcp'):
-                flow['fwd_header_lengths'].append(int(getattr(packet.tcp, 'hdr_len', 20)))
-        else:
-            flow['bwd_packets'] += 1
-            flow['bwd_bytes'] += packet_length
-            flow['bwd_lengths'].append(packet_length)
-            if hasattr(packet, 'tcp'):
-                flow['bwd_header_lengths'].append(int(getattr(packet.tcp, 'hdr_len', 20)))
-        
-        # Update TCP flags
-        if hasattr(packet, 'tcp'):
-            def safe_flag(flag_name):
-                val = getattr(packet.tcp, flag_name, False)
-                if isinstance(val, bool):
-                    return int(val)
-                if isinstance(val, int):
-                    return val
-                if isinstance(val, str):
-                    return 1 if val.lower() == 'true' else 0
-                return 0
+        try:
+            current_time = float(packet.sniff_timestamp)
+            packet_length = int(getattr(packet, 'length', 0))
             
-            flow['tcp_flags']['fin'] += safe_flag('flags_fin')
-            flow['tcp_flags']['syn'] += safe_flag('flags_syn')
-            flow['tcp_flags']['rst'] += safe_flag('flags_reset')
-            flow['tcp_flags']['psh'] += safe_flag('flags_push')
-            flow['tcp_flags']['ack'] += safe_flag('flags_ack')
-            flow['tcp_flags']['urg'] += safe_flag('flags_urg')
-        
-        # Store first packet for alert context
-        if len(flow['packets']) == 0:
-            flow['packets'].append({
-                'timestamp': current_time,
-                'length': packet_length,
-                'direction': direction,
-                'protocol': packet.highest_layer
-            })
-        
-        return flow_key
+            # Initialize flow if new
+            if flow_key not in self.flows:
+                self.flows[flow_key] = {
+                    'start_time': current_time,
+                    'last_time': current_time,
+                    'fwd_packets': 0,
+                    'bwd_packets': 0,
+                    'fwd_bytes': 0,
+                    'bwd_bytes': 0,
+                    'fwd_lengths': [],
+                    'bwd_lengths': [],
+                    'timestamps': [],
+                    'tcp_flags': defaultdict(int),
+                    'fwd_header_lengths': [],
+                    'bwd_header_lengths': [],
+                    'packets': [],
+                    'endpoints': (flow_key[0], flow_key[1])
+                }
+            
+            flow = self.flows[flow_key]
+            flow['last_time'] = current_time
+            flow['timestamps'].append(current_time)
+            
+            # Update direction-specific statistics
+            if direction == 'forward':
+                flow['fwd_packets'] += 1
+                flow['fwd_bytes'] += packet_length
+                flow['fwd_lengths'].append(packet_length)
+                if hasattr(packet, 'tcp'):
+                    flow['fwd_header_lengths'].append(int(getattr(packet.tcp, 'hdr_len', 20)))
+            else:
+                flow['bwd_packets'] += 1
+                flow['bwd_bytes'] += packet_length
+                flow['bwd_lengths'].append(packet_length)
+                if hasattr(packet, 'tcp'):
+                    flow['bwd_header_lengths'].append(int(getattr(packet.tcp, 'hdr_len', 20)))
+            
+            # Update TCP flags safely
+            if hasattr(packet, 'tcp'):
+                def safe_flag(flag_name):
+                    try:
+                        val = getattr(packet.tcp, flag_name, False)
+                        if isinstance(val, bool):
+                            return int(val)
+                        if isinstance(val, int):
+                            return val
+                        if isinstance(val, str):
+                            return 1 if val.lower() == 'true' else 0
+                        return 0
+                    except Exception:
+                        return 0
+                
+                flow['tcp_flags']['fin'] += safe_flag('flags_fin')
+                flow['tcp_flags']['syn'] += safe_flag('flags_syn')
+                flow['tcp_flags']['rst'] += safe_flag('flags_reset')
+                flow['tcp_flags']['psh'] += safe_flag('flags_push')
+                flow['tcp_flags']['ack'] += safe_flag('flags_ack')
+                flow['tcp_flags']['urg'] += safe_flag('flags_urg')
+            
+            # Store first packet for alert context
+            if len(flow['packets']) == 0:
+                flow['packets'].append({
+                    'timestamp': current_time,
+                    'length': packet_length,
+                    'direction': direction,
+                    'protocol': packet.highest_layer
+                })
+            
+            return flow_key
+            
+        except Exception as e:
+            print(f"❌ Error updating flow: {e}")
+            return None
 
     def extract_flow_features(self, flow_data: Dict) -> Dict[str, float]:
         """Extract comprehensive flow features for ML model."""
@@ -315,7 +343,7 @@ class NetworkIntrusionDetector:
             total_bytes = flow_data['fwd_bytes'] + flow_data['bwd_bytes']
             
             # Get destination port from endpoints
-            dest_port = flow_data['endpoints'][1][1]  # Second endpoint, port
+            dest_port = flow_data['endpoints'][1][1]
             
             # Forward packet length statistics
             fwd_lengths = flow_data['fwd_lengths']
@@ -366,7 +394,7 @@ class NetworkIntrusionDetector:
             # TCP flags
             tcp_flags = flow_data['tcp_flags']
             
-            # Build feature dictionary in exact order expected by model (matches preprocessing.py)
+            # Build feature dictionary matching training format
             features = {
                 ' Destination Port': dest_port,
                 ' Flow Duration': duration * 1000000,  # Convert to microseconds
@@ -429,7 +457,7 @@ class NetworkIntrusionDetector:
             print(f"❌ Error extracting flow features: {e}")
             return {}
 
-    def get_required_features(self) -> List[str]:
+    def _get_required_features(self) -> List[str]:
         """Return the list of features required by the model in the correct order."""
         return [
             ' Destination Port', ' Flow Duration', ' Total Fwd Packets', 
@@ -481,33 +509,35 @@ class NetworkIntrusionDetector:
         if not features_list:
             return np.array([])
         
-        # Convert to DataFrame
-        df = pd.DataFrame(features_list)
-        
-        # Get the required features list
-        required_features = self.get_required_features()
-        
-        # Fill missing values with 0
-        for col in required_features:
-            if col not in df.columns:
-                df[col] = 0
-        
-        # Select only the required features in the correct order
-        X = df[required_features]
-        
-        # Replace infinite values with large finite values
-        X = X.replace([np.inf, -np.inf], [1e9, -1e9])
-        
-        # Fill any remaining NaN values
-        X = X.fillna(0)
-        
-        # Scale features using the saved scaler (transform, not fit_transform)
-        X_scaled = self.scaler.transform(X)
-        
-        return X_scaled
+        try:
+            # Convert to DataFrame
+            df = pd.DataFrame(features_list)
+            
+            # Fill missing values with 0
+            for col in self._required_features:
+                if col not in df.columns:
+                    df[col] = 0
+            
+            # Select only the required features in the correct order
+            X = df[self._required_features]
+            
+            # Replace infinite values with large finite values
+            X = X.replace([np.inf, -np.inf], [1e9, -1e9])
+            
+            # Fill any remaining NaN values
+            X = X.fillna(0)
+            
+            # Scale features using the saved scaler
+            X_scaled = self.scaler.transform(X)
+            
+            return X_scaled
+            
+        except Exception as e:
+            print(f"❌ Error preprocessing features: {e}")
+            return np.array([])
 
     def process_flow_batch(self, flow_features: List[Dict], flow_packets: List[Dict]) -> List[Dict]:
-        """Process a batch of flows for intrusion detection with production-optimized thresholds."""
+        """Process a batch of flows for intrusion detection."""
         if not flow_features:
             return []
         
@@ -521,9 +551,9 @@ class NetworkIntrusionDetector:
         
         batch_alerts = []
         
-        # Make predictions based on model type
-        if self.model_type == 'xgboost':
-            try:
+        try:
+            # Make predictions based on model type
+            if self.model_type == 'xgboost':
                 # Get raw prediction probabilities
                 raw_predictions = self.model.predict_proba(X)
                 positive_probs = raw_predictions[:, 1]  # Probability of class 1 (attack)
@@ -544,30 +574,12 @@ class NetworkIntrusionDetector:
                 # Generate alerts for detected intrusions
                 for i, (pred, prob) in enumerate(zip(predictions, positive_probs)):
                     if pred == 1:
-                        packet = flow_packets[i]
-                        alert = {
-                            'timestamp': time.time(),
-                            'model': 'xgboost',
-                            'source_ip': 'Flow-based',
-                            'destination_ip': 'Analysis',
-                            'destination_port': int(flow_features[i].get(' Destination Port', 0)),
-                            'protocol': packet.get('protocol', 'Unknown'),
-                            'confidence': float(prob),
-                            'threshold_used': self.threshold,
-                            'alert_reason': 'XGBoost detection',
-                            'packet_info': {
-                                'length': packet.get('length', 0),
-                                'time': packet.get('timestamp', 0)
-                            }
-                        }
+                        packet = flow_packets[i] if i < len(flow_packets) else {}
+                        alert = self._create_alert('xgboost', flow_features[i], packet, float(prob))
                         batch_alerts.append(alert)
                         print(f"🚨 ALERT: XGBoost intrusion detected - Port: {alert['destination_port']}, Confidence: {prob:.4f}")
                 
-            except Exception as e:
-                print(f"❌ Error during XGBoost prediction: {str(e)}")
-        
-        else:  # BiLSTM
-            try:
+            else:  # BiLSTM
                 X_reshaped = X.reshape((X.shape[0], X.shape[1], 1))
                 raw_predictions = self.model.predict(X_reshaped, verbose=0)
                 
@@ -587,43 +599,51 @@ class NetworkIntrusionDetector:
                 # Generate alerts for detected intrusions
                 for i, (pred, prob) in enumerate(zip(predictions, raw_predictions.flatten())):
                     if pred == 1:
-                        packet = flow_packets[i]
-                        alert = {
-                            'timestamp': time.time(),
-                            'model': 'bilstm',
-                            'source_ip': 'Flow-based',
-                            'destination_ip': 'Analysis',
-                            'destination_port': int(flow_features[i].get(' Destination Port', 0)),
-                            'protocol': packet.get('protocol', 'Unknown'),
-                            'confidence': float(prob),
-                            'threshold_used': self.threshold,
-                            'alert_reason': 'BiLSTM sequential pattern detection',
-                            'packet_info': {
-                                'length': packet.get('length', 0),
-                                'time': packet.get('timestamp', 0)
-                            }
-                        }
+                        packet = flow_packets[i] if i < len(flow_packets) else {}
+                        alert = self._create_alert('bilstm', flow_features[i], packet, float(prob))
                         batch_alerts.append(alert)
                         print(f"🚨 ALERT: BiLSTM intrusion detected - Port: {alert['destination_port']}, Confidence: {prob:.4f}")
                 
-            except Exception as e:
-                print(f"❌ Error during BiLSTM prediction: {str(e)}")
+        except Exception as e:
+            print(f"❌ Error during prediction: {str(e)}")
         
         print(f"✅ Batch complete. Found {len(batch_alerts)} potential intrusions.")
         return batch_alerts
+
+    def _create_alert(self, model_type: str, features: Dict, packet: Dict, confidence: float) -> Dict:
+        """Create a standardized alert dictionary."""
+        return {
+            'timestamp': time.time(),
+            'model': model_type,
+            'source_ip': 'Flow-based',
+            'destination_ip': 'Analysis',
+            'destination_port': int(features.get(' Destination Port', 0)),
+            'protocol': packet.get('protocol', 'Unknown'),
+            'confidence': confidence,
+            'threshold_used': self.threshold,
+            'alert_reason': f'{model_type.upper()} detection',
+            'packet_info': {
+                'length': packet.get('length', 0),
+                'time': packet.get('timestamp', 0)
+            }
+        }
 
     def detect_intrusions_from_file(self, pcap_file: str, max_packets: int = 5000, batch_size: int = 1000) -> List[Dict]:
         """Analyze a PCAP file for intrusions using flow-based feature extraction."""
         print(f"🔍 Analyzing PCAP file: {pcap_file} (limited to {max_packets} packets)")
         
-        capture = pyshark.FileCapture(pcap_file)
+        capture = None
         packet_count = 0
         total_alerts = []
-        flow_features = []
-        flow_packets = []
         
         try:
+            capture = pyshark.FileCapture(pcap_file)
+            
             for packet in capture:
+                if self.stop_requested:
+                    print("🛑 Stop requested during PCAP analysis")
+                    break
+                    
                 packet_count += 1
                 
                 if packet_count > max_packets:
@@ -639,70 +659,72 @@ class NetworkIntrusionDetector:
                 # Check for completed flows periodically
                 if packet_count % 500 == 0:
                     completed_flows = self.get_completed_flows()
-                    for flow_key, features, flow_data in completed_flows:
-                        flow_features.append(features)
-                        flow_packets.append(flow_data['packets'][0] if flow_data['packets'] else {})
-                        
-                        # Process in batches
-                        if len(flow_features) >= batch_size:
-                            alerts = self.process_flow_batch(flow_features, flow_packets)
-                            total_alerts.extend(alerts)
-                            flow_features = []
-                            flow_packets = []
+                    if completed_flows:
+                        flow_features = [features for _, features, _ in completed_flows]
+                        flow_packets = [flow_data['packets'][0] if flow_data['packets'] else {} 
+                                       for _, _, flow_data in completed_flows]
+                        alerts = self.process_flow_batch(flow_features, flow_packets)
+                        total_alerts.extend(alerts)
             
             # Process remaining flows
             print("🔄 Processing remaining flows...")
             completed_flows = self.get_completed_flows(force_completion=True)
-            for flow_key, features, flow_data in completed_flows:
-                flow_features.append(features)
-                flow_packets.append(flow_data['packets'][0] if flow_data['packets'] else {})
-            
-            # Process final batch
-            if flow_features:
+            if completed_flows:
+                flow_features = [features for _, features, _ in completed_flows]
+                flow_packets = [flow_data['packets'][0] if flow_data['packets'] else {} 
+                               for _, _, flow_data in completed_flows]
                 alerts = self.process_flow_batch(flow_features, flow_packets)
                 total_alerts.extend(alerts)
         
         except Exception as e:
             print(f"❌ Error during PCAP analysis: {e}")
         finally:
+            if capture:
+                capture.close()
             self.packet_count = packet_count
-            capture.close()
         
         # Update performance metrics
-        self.performance['total_packets_analyzed'] += packet_count
-        self.performance['total_alerts'] += len(total_alerts)
-        self.performance['flows_processed'] = len(self.flows)
-        if packet_count > 0:
-            self.performance['alert_rate'] = (len(total_alerts) / packet_count) * 100
+        self._update_performance_metrics(packet_count, total_alerts)
         
         print(f"✅ PCAP analysis complete. Processed {packet_count} packets. Found {len(total_alerts)} potential intrusions.")
-        
-        # Save alerts to file for later analysis
         self.save_alerts(total_alerts)
         
         return total_alerts
 
     def detect_intrusions(self, duration: int = 60) -> List[Dict]:
-        """Capture packets and detect intrusions for the specified duration using flow-based analysis."""
+        """Capture packets and detect intrusions with proper timeout handling."""
         print(f"🔴 Starting live packet capture on interface {self.interface} for {duration} seconds...")
         
         self.start_time = time.time()
         self.capture_active = True
+        self.stop_requested = False
         packet_count = 0
         total_alerts = []
         
         try:
-            capture = pyshark.LiveCapture(interface=self.interface)
+            self.capture = pyshark.LiveCapture(interface=self.interface)
             
             print("🎯 Live capture started. Monitoring for intrusions...")
-            for packet in capture.sniff_continuously():
-                if not self.capture_active:
+            
+            # Manual timeout implementation - NO timeout parameter
+            for packet in self.capture.sniff_continuously():
+                # Check for stop conditions first
+                current_time = time.time()
+                elapsed_time = current_time - self.start_time
+                
+                if self.stop_requested or not self.capture_active:
+                    print("🛑 Stop signal received, breaking capture loop...")
+                    break
+                    
+                if elapsed_time >= duration:
+                    print("⏰ Duration elapsed, stopping capture...")
+                    self.capture_active = False
                     break
                 
                 packet_count += 1
                 self.update_flow(packet)
                 
-                # Check for completed flows periodically
+                # Check for completed flows less frequently to reduce spam
                 if packet_count % 50 == 0:
                     completed_flows = self.get_completed_flows()
                     if completed_flows:
@@ -712,11 +734,9 @@ class NetworkIntrusionDetector:
                         alerts = self.process_flow_batch(flow_features, flow_packets)
                         total_alerts.extend(alerts)
                 
-                # Check if duration has elapsed
-                if time.time() - self.start_time >= duration:
-                    print("⏰ Duration elapsed, stopping capture...")
-                    self.capture_active = False
-                    break
+                # Reduce progress spam by only printing every 500 packets
+                if packet_count % 500 == 0:
+                    print(f"   Processed {packet_count} packets... ({elapsed_time:.1f}s elapsed)")
             
             # Process remaining flows
             print("🔄 Processing remaining flows...")
@@ -729,51 +749,73 @@ class NetworkIntrusionDetector:
                 total_alerts.extend(alerts)
             
         except KeyboardInterrupt:
-            print("\n⏸️  Capture interrupted by user.")
+            print("\n⏸️  Capture interrupted by user (Ctrl+C).")
+            self.stop_requested = True
         except Exception as e:
             print(f"❌ Error during live capture: {e}")
+            # Don't restart automatically on error
+            self.stop_requested = True
         finally:
+            # Ensure proper cleanup
             self.capture_active = False
+            if self.capture:
+                try:
+                    self.capture.close()
+                except Exception:
+                    pass
+            
             elapsed = time.time() - self.start_time
             print(f"\n✅ Live capture completed in {elapsed:.2f} seconds.")
             print(f"   Processed {packet_count} packets in {len(self.flows)} active flows.")
-            self.performance['processing_time'] = elapsed
-            self.performance['total_packets_analyzed'] = packet_count
-            self.performance['total_alerts'] = len(total_alerts)
-            if packet_count > 0:
-                self.performance['alert_rate'] = (len(total_alerts) / packet_count) * 100
+            
+            # Update performance metrics
+            self._update_performance_metrics(packet_count, total_alerts, elapsed)
         
         print(f"🎯 Detection complete. Found {len(total_alerts)} potential intrusions.")
         self.save_alerts(total_alerts)
         
         return total_alerts
 
+    def _update_performance_metrics(self, packet_count: int, alerts: List[Dict], elapsed_time: float = None):
+        """Update performance metrics."""
+        if elapsed_time is not None:
+            self.performance['processing_time'] = elapsed_time
+        self.performance['total_packets_analyzed'] = packet_count
+        self.performance['total_alerts'] = len(alerts)
+        self.performance['flows_processed'] = len(self.flows)
+        if packet_count > 0:
+            self.performance['alert_rate'] = (len(alerts) / packet_count) * 100
+
     def save_alerts(self, alerts: List[Dict]) -> None:
         """Save alerts to a JSON file with enhanced metadata for analysis."""
         if not alerts:
             return
         
-        os.makedirs('alerts', exist_ok=True)
-        timestamp = time.strftime("%Y%m%d-%H%M%S")
-        filename = f"alerts/alerts_{timestamp}.json"
-        
-        # Add session metadata
-        session_info = {
-            'session_metadata': {
-                'timestamp': timestamp,
-                'model_type': self.model_type,
-                'threshold': self.threshold,
-                'threshold_config': self.OPTIMAL_THRESHOLDS[self.model_type],
-                'total_alerts': len(alerts),
-                'performance_metrics': self.performance
-            },
-            'alerts': alerts
-        }
-        
-        with open(filename, 'w') as f:
-            json.dump(session_info, f, indent=2, default=str)
-        
-        print(f"💾 Alerts saved to {filename}")
+        try:
+            os.makedirs('alerts', exist_ok=True)
+            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            filename = f"alerts/alerts_{timestamp}.json"
+            
+            # Add session metadata
+            session_info = {
+                'session_metadata': {
+                    'timestamp': timestamp,
+                    'model_type': self.model_type,
+                    'threshold': self.threshold,
+                    'threshold_config': self.OPTIMAL_THRESHOLDS[self.model_type],
+                    'total_alerts': len(alerts),
+                    'performance_metrics': self.performance
+                },
+                'alerts': alerts
+            }
+            
+            with open(filename, 'w') as f:
+                json.dump(session_info, f, indent=2, default=str)
+            
+            print(f"💾 Alerts saved to {filename}")
+            
+        except Exception as e:
+            print(f"❌ Error saving alerts: {e}")
 
     def get_performance_metrics(self) -> Dict[str, Any]:
         """Return comprehensive performance metrics for the detection system."""
@@ -836,12 +878,16 @@ def main():
             print("🔄 Falling back to PCAP file analysis...")
             
             # Fall back to PCAP file analysis
-            pcap_files = [f for f in os.listdir('data') if f.endswith('.pcap')]
-            if pcap_files:
-                print(f"📁 Found PCAP file: {pcap_files[0]}")
-                alerts = detector.detect_intrusions_from_file(f"data/{pcap_files[0]}", max_packets=args.max_packets)
-            else:
-                print("❌ No PCAP files found.")
+            try:
+                pcap_files = [f for f in os.listdir('data') if f.endswith('.pcap')]
+                if pcap_files:
+                    print(f"📁 Found PCAP file: {pcap_files[0]}")
+                    alerts = detector.detect_intrusions_from_file(f"data/{pcap_files[0]}", max_packets=args.max_packets)
+                else:
+                    print("❌ No PCAP files found.")
+                    alerts = []
+            except Exception:
+                print("❌ Fallback failed.")
                 alerts = []
     
     # Print comprehensive summary
@@ -851,8 +897,9 @@ def main():
     print(f"🎯 Detected {len(alerts)} potential intrusions")
     
     for i, alert in enumerate(alerts[:10]):  # Show first 10 alerts
+        model_name = alert.get('model', 'unknown').upper()
         print(f"   Alert {i+1}: {alert['source_ip']} -> {alert['destination_ip']}:{alert['destination_port']} "
-              f"({alert['protocol']}) - Confidence: {alert['confidence']:.4f} [{alert['model'].upper()}]")
+              f"({alert['protocol']}) - Confidence: {alert['confidence']:.4f} [{model_name}]")
     
     if len(alerts) > 10:
         print(f"   ... and {len(alerts) - 10} more alerts")

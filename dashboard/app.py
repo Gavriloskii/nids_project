@@ -6,6 +6,7 @@ import sys
 import time
 import logging
 import threading
+import signal
 import joblib
 import numpy as np
 from datetime import datetime
@@ -48,9 +49,11 @@ MODEL_CONFIG = {
     }
 }
 
-# Thread-safe globals
+# Thread-safe globals with proper stop handling
 detector = None
+detection_thread = None
 is_monitoring = threading.Event()
+stop_event = threading.Event()
 alerts_lock = threading.Lock()
 recent_alerts = []
 system_status = {
@@ -62,7 +65,9 @@ system_status = {
     'progress': 0,
     'is_monitoring': False,
     'model_version': 'corrected',
-    'feature_extraction': 'flow_based'
+    'feature_extraction': 'flow_based',
+    'can_stop': False,
+    'stop_requested': False
 }
 
 def load_alerts(limit=100):
@@ -227,8 +232,8 @@ def validate_model_files(model_type):
     return validation_result
 
 def background_detection(interface='lo', model_type='xgboost', duration=300):
-    """Run network monitoring in background thread with corrected models"""
-    global detector, recent_alerts, system_status
+    """Run network monitoring in background thread with proper stop handling"""
+    global detector, recent_alerts, system_status, stop_event
     
     try:
         logger.info(f"Starting {model_type} detection on {interface} (using corrected flow-based model)")
@@ -245,6 +250,8 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
             'error': None,
             'progress': 0,
             'is_monitoring': True,
+            'can_stop': True,
+            'stop_requested': False,
             'model_version': 'corrected' if validation['status'] == 'corrected_ready' else 'fallback',
             'feature_extraction': 'flow_based',
             'model_validation': validation
@@ -254,8 +261,38 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
         detector = NetworkIntrusionDetector(interface=interface, model_type=model_type)
         logger.info("Model loaded successfully")
 
-        # Run detection with flow-based feature extraction
-        alerts = detector.detect_intrusions(duration=duration)
+        # Run detection with stop event monitoring
+        alerts = []
+        start_time = time.time()
+        
+        # Custom detection loop that respects stop event
+        while not stop_event.is_set() and (time.time() - start_time) < duration:
+            try:
+                # Run detection in short bursts to allow stop checking
+                mini_duration = min(30, duration - (time.time() - start_time))
+                if mini_duration <= 0:
+                    break
+                    
+                batch_alerts = detector.detect_intrusions(duration=int(mini_duration))
+                alerts.extend(batch_alerts)
+                
+                # Update progress
+                elapsed = time.time() - start_time
+                progress = min(100, (elapsed / duration) * 100)
+                system_status['progress'] = progress
+                
+                if stop_event.is_set():
+                    logger.info("Stop event detected in detection loop")
+                    break
+                    
+            except Exception as e:
+                logger.error(f"Error in detection mini-loop: {e}")
+                break
+        
+        # Force stop the detector if it's still running
+        if detector:
+            remaining_flows = detector.stop_detection()
+            logger.info(f"Forced stop completed, processed {remaining_flows} remaining flows")
         
         # Process alerts for dashboard compatibility
         processed_alerts = process_flow_alerts(alerts)
@@ -266,7 +303,7 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
             recent_alerts = processed_alerts + recent_alerts[:100]
 
         # Get performance metrics from detector
-        performance = detector.get_performance_metrics()
+        performance = detector.get_performance_metrics() if detector else {}
         
         # Update final status
         system_status.update({
@@ -275,7 +312,8 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
             'alert_count': len(processed_alerts),
             'progress': 100,
             'processing_time': performance.get('processing_time', 0),
-            'performance_metrics': performance
+            'performance_metrics': performance,
+            'can_stop': False
         })
 
     except Exception as e:
@@ -283,18 +321,29 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
         system_status.update({
             'status': 'error',
             'error': str(e),
-            'error_type': 'detection_error'
+            'error_type': 'detection_error',
+            'can_stop': False
         })
     finally:
+        # Clean shutdown
         is_monitoring.clear()
+        stop_event.clear()
         system_status.update({
             'is_monitoring': False,
-            'last_updated': time.time()
+            'last_updated': time.time(),
+            'stop_requested': False
         })
+        
+        # Force cleanup detector
+        if detector:
+            try:
+                detector.stop_detection()
+            except:
+                pass
 
 def background_pcap_analysis(pcap_path, model_type, max_packets):
-    """Analyze PCAP file in background thread with corrected models"""
-    global detector, recent_alerts, system_status
+    """Analyze PCAP file in background thread with proper stop handling"""
+    global detector, recent_alerts, system_status, stop_event
     
     try:
         logger.info(f"Starting PCAP analysis of {pcap_path} with {model_type} (corrected flow-based model)")
@@ -311,6 +360,8 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
             'error': None,
             'progress': 0,
             'is_monitoring': True,
+            'can_stop': True,
+            'stop_requested': False,
             'model_version': 'corrected' if validation['status'] == 'corrected_ready' else 'fallback',
             'feature_extraction': 'flow_based',
             'pcap_file': os.path.basename(pcap_path),
@@ -321,8 +372,14 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
         # Initialize detector with corrected model
         detector = NetworkIntrusionDetector(model_type=model_type)
         
-        # Run analysis with flow-based feature extraction
+        # Run analysis with stop monitoring
         alerts = detector.detect_intrusions_from_file(pcap_path, max_packets=max_packets)
+        
+        # Check if stop was requested during analysis
+        if stop_event.is_set():
+            logger.info("Stop requested during PCAP analysis")
+            if detector:
+                detector.stop_detection()
         
         # Process alerts for dashboard compatibility
         processed_alerts = process_flow_alerts(alerts)
@@ -333,7 +390,7 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
             recent_alerts = processed_alerts + recent_alerts[:100]
 
         # Get performance metrics from detector
-        performance = detector.get_performance_metrics()
+        performance = detector.get_performance_metrics() if detector else {}
 
         # Update final status
         system_status.update({
@@ -342,7 +399,8 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
             'alert_count': len(processed_alerts),
             'progress': 100,
             'processing_time': performance.get('processing_time', 0),
-            'performance_metrics': performance
+            'performance_metrics': performance,
+            'can_stop': False
         })
 
     except Exception as e:
@@ -350,13 +408,17 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
         system_status.update({
             'status': 'error',
             'error': str(e),
-            'error_type': 'pcap_analysis_error'
+            'error_type': 'pcap_analysis_error',
+            'can_stop': False
         })
     finally:
+        # Clean shutdown
         is_monitoring.clear()
+        stop_event.clear()
         system_status.update({
             'is_monitoring': False,
-            'last_updated': time.time()
+            'last_updated': time.time(),
+            'stop_requested': False
         })
 
 @app.route('/')
@@ -418,7 +480,9 @@ def api_alerts():
 
 @app.route('/api/start_detection', methods=['POST'])
 def start_detection():
-    """Start live network monitoring with corrected models"""
+    """Start live network monitoring with corrected models and proper thread management"""
+    global detection_thread, stop_event
+    
     if is_monitoring.is_set():
         return jsonify({'status': 'error', 'message': 'Already monitoring'})
 
@@ -442,22 +506,30 @@ def start_detection():
             })
 
         logger.info(f"Starting detection with {model_type} on {interface} for {duration}s")
+        
+        # Clear any previous stop events
+        stop_event.clear()
         is_monitoring.set()
-        thread = threading.Thread(
+        
+        # Start detection thread
+        detection_thread = threading.Thread(
             target=background_detection,
-            args=(interface, model_type, duration)
+            args=(interface, model_type, duration),
+            name=f"Detection-{model_type}-{int(time.time())}"
         )
-        thread.daemon = True
-        thread.start()
+        detection_thread.daemon = True
+        detection_thread.start()
 
         return jsonify({
             'status': 'success', 
             'message': 'Monitoring started with corrected flow-based model',
-            'model_validation': validation
+            'model_validation': validation,
+            'thread_id': detection_thread.name
         })
 
     except Exception as e:
         logger.error(f"Start detection failed: {str(e)}")
+        is_monitoring.clear()
         return jsonify({'status': 'error', 'message': str(e)})
 
 @app.route('/api/start', methods=['POST'])
@@ -467,19 +539,72 @@ def start_monitoring():
 
 @app.route('/api/stop_detection', methods=['POST'])
 def stop_detection():
-    """Stop ongoing detection"""
+    """Stop ongoing detection with proper cleanup"""
+    global detector, detection_thread, stop_event
+    
     if not is_monitoring.is_set():
         return jsonify({'status': 'error', 'message': 'No detection running'})
     
-    # Set flag to stop
-    is_monitoring.clear()
-    system_status['status'] = 'stopping'
-    
-    return jsonify({'status': 'success', 'message': 'Stopping detection'})
+    try:
+        logger.info("Stop detection requested via API")
+        
+        # Set stop flags
+        system_status['stop_requested'] = True
+        system_status['status'] = 'stopping'
+        stop_event.set()
+        
+        # Force stop the detector if it exists
+        remaining_flows = 0
+        if detector:
+            try:
+                remaining_flows = detector.stop_detection()
+                logger.info(f"Detector stopped, processed {remaining_flows} remaining flows")
+            except Exception as e:
+                logger.error(f"Error stopping detector: {e}")
+        
+        # Wait for thread to finish (with timeout)
+        if detection_thread and detection_thread.is_alive():
+            detection_thread.join(timeout=5.0)
+            if detection_thread.is_alive():
+                logger.warning("Detection thread did not stop within timeout")
+        
+        # Clear monitoring flags
+        is_monitoring.clear()
+        
+        # Update status
+        system_status.update({
+            'status': 'stopped',
+            'is_monitoring': False,
+            'can_stop': False,
+            'stop_requested': False,
+            'last_updated': time.time()
+        })
+        
+        return jsonify({
+            'status': 'success', 
+            'message': 'Detection stopped successfully',
+            'remaining_flows': remaining_flows,
+            'thread_stopped': not (detection_thread and detection_thread.is_alive())
+        })
+        
+    except Exception as e:
+        logger.error(f"Error stopping detection: {e}")
+        # Force cleanup on error
+        is_monitoring.clear()
+        stop_event.set()
+        system_status.update({
+            'status': 'error',
+            'error': f'Stop failed: {str(e)}',
+            'is_monitoring': False,
+            'can_stop': False
+        })
+        return jsonify({'status': 'error', 'message': f'Error stopping: {str(e)}'})
 
 @app.route('/api/analyze_pcap', methods=['POST'])
 def analyze_pcap_endpoint():
-    """Start PCAP file analysis with corrected models"""
+    """Start PCAP file analysis with corrected models and proper thread management"""
+    global detection_thread, stop_event
+    
     if is_monitoring.is_set():
         return jsonify({'status': 'error', 'message': 'Already busy'})
 
@@ -509,22 +634,30 @@ def analyze_pcap_endpoint():
             })
 
         logger.info(f"Starting PCAP analysis of {pcap_path} with {model_type}")
+        
+        # Clear any previous stop events
+        stop_event.clear()
         is_monitoring.set()
-        thread = threading.Thread(
+        
+        # Start analysis thread
+        detection_thread = threading.Thread(
             target=background_pcap_analysis,
-            args=(pcap_path, model_type, max_packets)
+            args=(pcap_path, model_type, max_packets),
+            name=f"PCAP-Analysis-{model_type}-{int(time.time())}"
         )
-        thread.daemon = True
-        thread.start()
+        detection_thread.daemon = True
+        detection_thread.start()
 
         return jsonify({
             'status': 'success', 
             'message': 'Analysis started with corrected flow-based model',
-            'model_validation': validation
+            'model_validation': validation,
+            'thread_id': detection_thread.name
         })
 
     except Exception as e:
         logger.error(f"PCAP analysis failed: {str(e)}")
+        is_monitoring.clear()
         return jsonify({'status': 'error', 'message': str(e)})
 
 @app.route('/api/analyze', methods=['POST'])
@@ -738,7 +871,12 @@ def system_health():
             'alerts_directory': 'checking'
         },
         'models': {},
-        'directories': {}
+        'directories': {},
+        'threads': {
+            'monitoring_active': is_monitoring.is_set(),
+            'stop_event_set': stop_event.is_set(),
+            'detection_thread_alive': detection_thread.is_alive() if detection_thread else False
+        }
     }
     
     try:
@@ -772,12 +910,37 @@ def system_health():
     
     return jsonify(health)
 
+# Graceful shutdown handler
+def shutdown_handler(signum, frame):
+    """Handle shutdown signals gracefully"""
+    logger.info(f"Received shutdown signal {signum}")
+    
+    # Stop any running detection
+    if is_monitoring.is_set():
+        logger.info("Stopping detection due to shutdown")
+        stop_event.set()
+        if detector:
+            detector.stop_detection()
+    
+    # Wait for threads to finish
+    if detection_thread and detection_thread.is_alive():
+        logger.info("Waiting for detection thread to finish...")
+        detection_thread.join(timeout=5.0)
+    
+    logger.info("Graceful shutdown complete")
+    sys.exit(0)
+
+# Register signal handlers
+signal.signal(signal.SIGINT, shutdown_handler)
+signal.signal(signal.SIGTERM, shutdown_handler)
+
 if __name__ == '__main__':
     # Create required directories
     os.makedirs(os.path.join(os.path.dirname(__file__), '..', 'alerts'), exist_ok=True)
     os.makedirs(os.path.join(os.path.dirname(__file__), '..', 'data'), exist_ok=True)
     
     # Print model configuration
+    logger.info("🛡️  AI-Powered NIDS Dashboard Starting...")
     logger.info("Model Configuration:")
     for model_type, config in MODEL_CONFIG.items():
         logger.info(f"  {model_type}: {config['model_file']} (accuracy: {config['metrics']['accuracy']})")
@@ -792,6 +955,8 @@ if __name__ == '__main__':
     for model_type in MODEL_CONFIG.keys():
         validation = validate_model_files(model_type)
         logger.info(f"  {model_type}: {validation['status']}")
+    
+    logger.info("🚀 Starting Flask server...")
     
     # Run Flask app
     app.run(

@@ -1,0 +1,458 @@
+{
+  "session_metadata": {
+    "timestamp": "20250810-152838",
+    "model_type": "xgboost",
+    "threshold": 0.01,
+    "threshold_config": {
+      "threshold": 0.01,
+      "description": "Optimized for 99.74% accuracy with <1% false positives",
+      "expected_alert_rate": "1.21% on mixed traffic",
+      "performance_notes": "Excellent balance: 7 alerts on attack traffic, 2 on benign"
+    },
+    "total_alerts": 29,
+    "performance_metrics": {
+      "total_packets_analyzed": 8738,
+      "total_alerts": 29,
+      "processing_time": 31.287638664245605,
+      "alert_rate": 0.33188372625314716,
+      "flows_processed": 0
+    }
+  },
+  "alerts": [
+    {
+      "timestamp": 1754839718.5512922,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 40784,
+      "protocol": "TCP",
+      "confidence": 0.014045937918126583,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839694.592925
+      }
+    },
+    {
+      "timestamp": 1754839718.551361,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 40786,
+      "protocol": "TCP",
+      "confidence": 0.014045937918126583,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839695.6991787
+      }
+    },
+    {
+      "timestamp": 1754839718.5513928,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 41252,
+      "protocol": "TCP",
+      "confidence": 0.014045937918126583,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839699.4866748
+      }
+    },
+    {
+      "timestamp": 1754839718.551457,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 41254,
+      "protocol": "TCP",
+      "confidence": 0.014045937918126583,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839700.5891273
+      }
+    },
+    {
+      "timestamp": 1754839718.5514944,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 52121,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839702.8413386
+      }
+    },
+    {
+      "timestamp": 1754839718.5515628,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 52123,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839703.9467313
+      }
+    },
+    {
+      "timestamp": 1754839718.5515945,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 37299,
+      "protocol": "TCP",
+      "confidence": 0.014045937918126583,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839711.1026056
+      }
+    },
+    {
+      "timestamp": 1754839718.5516613,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 37301,
+      "protocol": "TCP",
+      "confidence": 0.014045937918126583,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839712.206073
+      }
+    },
+    {
+      "timestamp": 1754839718.5516932,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3092546
+      }
+    },
+    {
+      "timestamp": 1754839718.551719,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3482237
+      }
+    },
+    {
+      "timestamp": 1754839718.5517225,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3482459
+      }
+    },
+    {
+      "timestamp": 1754839718.551726,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.348256
+      }
+    },
+    {
+      "timestamp": 1754839718.5517297,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3482652
+      }
+    },
+    {
+      "timestamp": 1754839718.551733,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3482745
+      }
+    },
+    {
+      "timestamp": 1754839718.5517366,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3482838
+      }
+    },
+    {
+      "timestamp": 1754839718.55174,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3482928
+      }
+    },
+    {
+      "timestamp": 1754839718.5517433,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483033
+      }
+    },
+    {
+      "timestamp": 1754839718.5517466,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483121
+      }
+    },
+    {
+      "timestamp": 1754839718.5517507,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.348321
+      }
+    },
+    {
+      "timestamp": 1754839718.551754,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483295
+      }
+    },
+    {
+      "timestamp": 1754839718.551757,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483384
+      }
+    },
+    {
+      "timestamp": 1754839718.5517604,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483474
+      }
+    },
+    {
+      "timestamp": 1754839718.5517638,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.348356
+      }
+    },
+    {
+      "timestamp": 1754839718.5517688,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483653
+      }
+    },
+    {
+      "timestamp": 1754839718.5517724,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483748
+      }
+    },
+    {
+      "timestamp": 1754839718.5517755,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483837
+      }
+    },
+    {
+      "timestamp": 1754839718.5517788,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.3483925
+      }
+    },
+    {
+      "timestamp": 1754839718.551782,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.348401
+      }
+    },
+    {
+      "timestamp": 1754839718.551785,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 51806,
+      "protocol": "TCP",
+      "confidence": 0.09092719852924347,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 58,
+        "time": 1754839716.34841
+      }
+    }
+  ]
+}
