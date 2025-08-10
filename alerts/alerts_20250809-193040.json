@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": 1754767840.8402874,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 3268,
+    "protocol": "TCP",
+    "confidence": 0.10662317276000977,
+    "packet_info": {
+      "length": 60,
+      "time": 1499083108.90054
+    }
+  }
+]

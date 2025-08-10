@@ -1,0 +1,22 @@
+BiLSTM Network Intrusion Detection Model - Performance Metrics
+============================================================
+
+Training Time: 6119.86 seconds
+Training Samples: 1,273,160
+Test Samples: 203,739
+Features: 53
+
+Performance Metrics:
+  Accuracy:  0.9415
+  Precision: 0.7988
+  Recall:    0.9793
+  F1 Score:  0.8799
+
+Confusion Matrix:
+  True Negatives:  148,145
+  False Positives: 11,000
+  False Negatives: 923
+  True Positives:  43,671
+
+Prediction Probability Range: 0.0000 - 1.0000
+Mean Prediction Probability: 0.2422

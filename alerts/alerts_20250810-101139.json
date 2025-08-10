@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": 1754820699.57673,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 52921,
+    "protocol": "DNS",
+    "confidence": 0.033759552985429764,
+    "packet_info": {
+      "length": 76,
+      "time": 1499428865.658074
+    }
+  }
+]

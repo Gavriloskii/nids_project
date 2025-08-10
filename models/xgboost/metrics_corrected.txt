@@ -1,0 +1,34 @@
+XGBoost Network Intrusion Detection Model - Performance Metrics
+============================================================
+
+Training Time: 56.46 seconds
+Training Samples: 1,273,160
+Test Samples: 203,739
+Features: 53
+
+Performance Metrics:
+  Accuracy:  0.9974
+  Precision: 0.9911
+  Recall:    0.9971
+  F1 Score:  0.9941
+
+Confusion Matrix:
+  True Negatives:  158,745
+  False Positives: 400
+  False Negatives: 128
+  True Positives:  44,466
+
+Prediction Probability Range: 0.0000 - 1.0000
+Mean Prediction Probability: 0.2212
+
+Top 10 Feature Importances:
+   1.  Fwd Packet Length Max: 0.3960
+   2.  Fwd Packet Length Mean: 0.1484
+   3.  URG Flag Count: 0.1257
+   4.  Packet Length Variance: 0.0839
+   5. Total Length of Fwd Packets: 0.0738
+   6.  Packet Length Std: 0.0505
+   7.  Bwd Packet Length Mean: 0.0167
+   8.  Fwd Header Length: 0.0123
+   9.  Total Fwd Packets: 0.0117
+  10.  Packet Length Mean: 0.0109

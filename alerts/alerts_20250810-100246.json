@@ -1,0 +1,74 @@
+[
+  {
+    "timestamp": 1754820166.6438653,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 138,
+    "protocol": "BROWSER",
+    "confidence": 0.02085169032216072,
+    "packet_info": {
+      "length": 279,
+      "time": 1499428841.949002
+    }
+  },
+  {
+    "timestamp": 1754820166.6438823,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 138,
+    "protocol": "BROWSER",
+    "confidence": 0.019937312230467796,
+    "packet_info": {
+      "length": 279,
+      "time": 1499428865.668958
+    }
+  },
+  {
+    "timestamp": 1754820166.6438859,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.02187698520720005,
+    "packet_info": {
+      "length": 314,
+      "time": 1499428866.883689
+    }
+  },
+  {
+    "timestamp": 1754820166.643891,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.018609169870615005,
+    "packet_info": {
+      "length": 197,
+      "time": 1499428868.636353
+    }
+  },
+  {
+    "timestamp": 1754820166.6439075,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.04682184010744095,
+    "packet_info": {
+      "length": 253,
+      "time": 1499428898.230266
+    }
+  },
+  {
+    "timestamp": 1754820166.6439118,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.011405713856220245,
+    "packet_info": {
+      "length": 185,
+      "time": 1499428901.037107
+    }
+  }
+]

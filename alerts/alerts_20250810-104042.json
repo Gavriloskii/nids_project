@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": 1754822442.1583347,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.03147555887699127,
+    "packet_info": {
+      "length": 253,
+      "time": 1499254962.282021
+    }
+  },
+  {
+    "timestamp": 1754822442.1583624,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.015450621023774147,
+    "packet_info": {
+      "length": 185,
+      "time": 1499254964.092328
+    }
+  }
+]

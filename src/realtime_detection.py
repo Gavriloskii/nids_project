@@ -2,6 +2,7 @@ import os
 import time
 import json
 import threading
+import joblib
 from collections import defaultdict
 from typing import Dict, List, Tuple, Optional, Any
 
@@ -25,18 +26,27 @@ class NetworkIntrusionDetector:
     - Comprehensive alert generation and persistence
     """
 
-    def __init__(self, interface: str = 'eth0', model_type: str = 'xgboost'):
+    def __init__(self, interface: str = 'eth0', model_type: str = 'xgboost', threshold: float = None):
         """
         Initialize the Network Intrusion Detection System.
         
         Parameters:
         - interface: Network interface to monitor (for live capture)
         - model_type: Type of model to use ('xgboost' or 'bilstm')
+        - threshold: Detection threshold (None for default values)
         """
         self.interface = interface
         self.model_type = model_type.lower()
         self.model = self._load_model()
-        self.scaler = StandardScaler()
+        self.scaler = self._load_scaler()
+        
+        # Set threshold based on model type and input
+        if threshold is not None:
+            self.threshold = threshold
+        else:
+            self.threshold = 0.1 if self.model_type == 'xgboost' else 0.3
+        
+        print(f"Using detection threshold: {self.threshold}")
         
         # Flow tracking
         self.flows: Dict[Tuple, Dict] = {}
@@ -103,6 +113,26 @@ class NetworkIntrusionDetector:
         
         else:
             raise ValueError(f"Unsupported model type: {self.model_type}")
+
+    def _load_scaler(self):
+        """Load the saved StandardScaler from training."""
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        
+        # Try to load saved scaler
+        scaler_paths = [
+            os.path.join(project_root, 'data', 'preprocessed_csv', 'scaler.pkl'),
+            os.path.join(project_root, 'models', 'scaler.pkl'),
+            os.path.join(project_root, 'scaler.pkl')
+        ]
+        
+        for scaler_path in scaler_paths:
+            if os.path.exists(scaler_path):
+                scaler = joblib.load(scaler_path)
+                print(f"Scaler loaded from: {scaler_path}")
+                return scaler
+        
+        print("Warning: No saved scaler found. Using new StandardScaler (may cause prediction issues)")
+        return StandardScaler()
 
     def get_flow_key(self, packet) -> Tuple[Optional[Tuple], Optional[str]]:
         """
@@ -427,8 +457,8 @@ class NetworkIntrusionDetector:
         # Fill any remaining NaN values
         X = X.fillna(0)
         
-        # Scale features
-        X_scaled = self.scaler.fit_transform(X)
+        # Scale features using the saved scaler (transform, not fit_transform)
+        X_scaled = self.scaler.transform(X)
         
         return X_scaled
 
@@ -456,9 +486,17 @@ class NetworkIntrusionDetector:
                 
                 print(f"XGBoost predictions - min: {positive_probs.min():.4f}, max: {positive_probs.max():.4f}, mean: {positive_probs.mean():.4f}")
                 
-                # Use threshold of 0.1 for XGBoost
-                predictions = (positive_probs > 0.1).astype(int)
-                print(f"Using threshold 0.1: Found {predictions.sum()} potential intrusions")
+                # Add probability analysis
+                print(f"Probabilities > 0.01: {(positive_probs > 0.01).sum()}")
+                print(f"Probabilities > 0.05: {(positive_probs > 0.05).sum()}")
+                print(f"Probabilities > 0.1: {(positive_probs > 0.1).sum()}")
+                print(f"Probabilities > 0.2: {(positive_probs > 0.2).sum()}")
+                print(f"Probabilities > 0.5: {(positive_probs > 0.5).sum()}")
+                print("First 10 probabilities:", positive_probs[:10])
+                
+                # Use the threshold from command line arguments
+                predictions = (positive_probs > self.threshold).astype(int)
+                print(f"Using threshold {self.threshold}: Found {predictions.sum()} potential intrusions")
                 
                 # Generate alerts for detected intrusions
                 for i, (pred, prob) in enumerate(zip(predictions, positive_probs)):
@@ -489,9 +527,17 @@ class NetworkIntrusionDetector:
                 
                 print(f"BiLSTM predictions - min: {raw_predictions.min():.4f}, max: {raw_predictions.max():.4f}, mean: {raw_predictions.mean():.4f}")
                 
-                # Use threshold of 0.3 for BiLSTM
-                predictions = (raw_predictions > 0.3).astype(int).flatten()
-                print(f"Using threshold 0.3: Found {predictions.sum()} potential intrusions")
+                # Add probability analysis
+                print(f"Probabilities > 0.01: {(raw_predictions > 0.01).sum()}")
+                print(f"Probabilities > 0.05: {(raw_predictions > 0.05).sum()}")
+                print(f"Probabilities > 0.1: {(raw_predictions > 0.1).sum()}")
+                print(f"Probabilities > 0.3: {(raw_predictions > 0.3).sum()}")
+                print(f"Probabilities > 0.5: {(raw_predictions > 0.5).sum()}")
+                print("First 10 probabilities:", raw_predictions.flatten()[:10])
+                
+                # Use the threshold from command line arguments
+                predictions = (raw_predictions > self.threshold).astype(int).flatten()
+                print(f"Using threshold {self.threshold}: Found {predictions.sum()} potential intrusions")
                 
                 # Generate alerts for detected intrusions
                 for i, (pred, prob) in enumerate(zip(predictions, raw_predictions.flatten())):
@@ -686,8 +732,8 @@ def main():
     
     args = parser.parse_args()
     
-    # Create detector instance
-    detector = NetworkIntrusionDetector(interface=args.interface, model_type=args.model)
+    # Create detector instance with threshold
+    detector = NetworkIntrusionDetector(interface=args.interface, model_type=args.model, threshold=args.threshold)
     
     # Run detection
     if args.pcap:

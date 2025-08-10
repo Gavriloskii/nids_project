@@ -1,0 +1,16 @@
+{
+  "created_timestamp": "2025-08-09 19:22:59",
+  "preprocessing_version": "2.0",
+  "total_features": 53,
+  "train_samples": 1273160,
+  "test_samples": 203739,
+  "train_benign": 636580,
+  "train_attack": 636580,
+  "test_benign": 159145,
+  "test_attack": 44594,
+  "test_size": 0.13795053013103808,
+  "random_state": 42,
+  "feature_scaling": "StandardScaler",
+  "class_balancing": "Upsample minority class in training set",
+  "data_source": "CIC-IDS 2017 CSV files"
+}

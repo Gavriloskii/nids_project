@@ -1,0 +1,14 @@
+[
+  {
+    "timestamp": 1753474185.4177377,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1900,
+    "protocol": "SSDP",
+    "confidence": 0.11875362694263458,
+    "packet_info": {
+      "length": 214,
+      "time": 1753474147.8737512
+    }
+  }
+]

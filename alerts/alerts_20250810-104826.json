@@ -1,0 +1,410 @@
+[
+  {
+    "timestamp": 1754822825.278181,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 138,
+    "protocol": "BROWSER",
+    "confidence": 0.02085169032216072,
+    "packet_info": {
+      "length": 279,
+      "time": 1499428841.949002
+    }
+  },
+  {
+    "timestamp": 1754822825.278292,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 138,
+    "protocol": "BROWSER",
+    "confidence": 0.019937312230467796,
+    "packet_info": {
+      "length": 279,
+      "time": 1499428865.668958
+    }
+  },
+  {
+    "timestamp": 1754822825.2783344,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.02187698520720005,
+    "packet_info": {
+      "length": 314,
+      "time": 1499428866.883689
+    }
+  },
+  {
+    "timestamp": 1754822825.2783585,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.018609169870615005,
+    "packet_info": {
+      "length": 197,
+      "time": 1499428868.636353
+    }
+  },
+  {
+    "timestamp": 1754822825.2783806,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.00674658315256238,
+    "packet_info": {
+      "length": 334,
+      "time": 1499428870.419757
+    }
+  },
+  {
+    "timestamp": 1754822825.2784162,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.0073686083778738976,
+    "packet_info": {
+      "length": 155,
+      "time": 1499428874.679418
+    }
+  },
+  {
+    "timestamp": 1754822825.2784338,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.009014168754220009,
+    "packet_info": {
+      "length": 229,
+      "time": 1499428876.430161
+    }
+  },
+  {
+    "timestamp": 1754822825.2784665,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.04682184010744095,
+    "packet_info": {
+      "length": 253,
+      "time": 1499428898.230266
+    }
+  },
+  {
+    "timestamp": 1754822825.2784836,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 5353,
+    "protocol": "MDNS",
+    "confidence": 0.011405713856220245,
+    "packet_info": {
+      "length": 185,
+      "time": 1499428901.037107
+    }
+  },
+  {
+    "timestamp": 1754822825.2786026,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1079,
+    "protocol": "TLS",
+    "confidence": 0.007505415007472038,
+    "packet_info": {
+      "length": 92,
+      "time": 1499428961.033083
+    }
+  },
+  {
+    "timestamp": 1754822825.2786164,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1079,
+    "protocol": "TCP",
+    "confidence": 0.013171825557947159,
+    "packet_info": {
+      "length": 1484,
+      "time": 1499428961.67674
+    }
+  },
+  {
+    "timestamp": 1754822825.278629,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1079,
+    "protocol": "TLS",
+    "confidence": 0.00795325729995966,
+    "packet_info": {
+      "length": 2914,
+      "time": 1499428962.232442
+    }
+  },
+  {
+    "timestamp": 1754822825.2786422,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1079,
+    "protocol": "TCP",
+    "confidence": 0.00905782263725996,
+    "packet_info": {
+      "length": 60,
+      "time": 1499428962.427098
+    }
+  },
+  {
+    "timestamp": 1754822825.2786546,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1079,
+    "protocol": "TCP",
+    "confidence": 0.008224778808653355,
+    "packet_info": {
+      "length": 1484,
+      "time": 1499428962.742814
+    }
+  },
+  {
+    "timestamp": 1754822825.2786689,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1079,
+    "protocol": "TCP",
+    "confidence": 0.01672196388244629,
+    "packet_info": {
+      "length": 2914,
+      "time": 1499428963.020359
+    }
+  },
+  {
+    "timestamp": 1754822825.278686,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1079,
+    "protocol": "TCP",
+    "confidence": 0.005393695086240768,
+    "packet_info": {
+      "length": 60,
+      "time": 1499428964.367365
+    }
+  },
+  {
+    "timestamp": 1754822825.2787387,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.013562110252678394,
+    "packet_info": {
+      "length": 205,
+      "time": 1499428997.436229
+    }
+  },
+  {
+    "timestamp": 1754822882.1072392,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 1079,
+    "protocol": "TLS",
+    "confidence": 0.0053930459544062614,
+    "packet_info": {
+      "length": 100,
+      "time": 1499429023.48708
+    }
+  },
+  {
+    "timestamp": 1754822882.1072948,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 123,
+    "protocol": "NTP",
+    "confidence": 0.005450424738228321,
+    "packet_info": {
+      "length": 90,
+      "time": 1499429051.150864
+    }
+  },
+  {
+    "timestamp": 1754822882.107314,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.005078114103525877,
+    "packet_info": {
+      "length": 143,
+      "time": 1499429052.767919
+    }
+  },
+  {
+    "timestamp": 1754822882.1073422,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.005433595739305019,
+    "packet_info": {
+      "length": 144,
+      "time": 1499429054.505351
+    }
+  },
+  {
+    "timestamp": 1754822882.1073933,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 443,
+    "protocol": "TLS",
+    "confidence": 0.10322096198797226,
+    "packet_info": {
+      "length": 539,
+      "time": 1499429078.453639
+    }
+  },
+  {
+    "timestamp": 1754822882.1074507,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 443,
+    "protocol": "TCP",
+    "confidence": 0.05588396638631821,
+    "packet_info": {
+      "length": 66,
+      "time": 1499429102.125695
+    }
+  },
+  {
+    "timestamp": 1754822882.1075032,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 138,
+    "protocol": "BROWSER",
+    "confidence": 0.005877329036593437,
+    "packet_info": {
+      "length": 279,
+      "time": 1499429124.314543
+    }
+  },
+  {
+    "timestamp": 1754822906.1906335,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.007918274961411953,
+    "packet_info": {
+      "length": 149,
+      "time": 1499429146.810084
+    }
+  },
+  {
+    "timestamp": 1754822906.1906455,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.005598471499979496,
+    "packet_info": {
+      "length": 151,
+      "time": 1499429146.81104
+    }
+  },
+  {
+    "timestamp": 1754822906.190655,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.018326709046959877,
+    "packet_info": {
+      "length": 172,
+      "time": 1499429146.879852
+    }
+  },
+  {
+    "timestamp": 1754822906.190686,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.007311608642339706,
+    "packet_info": {
+      "length": 174,
+      "time": 1499429148.133785
+    }
+  },
+  {
+    "timestamp": 1754822906.1906967,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.014837447553873062,
+    "packet_info": {
+      "length": 214,
+      "time": 1499429148.153368
+    }
+  },
+  {
+    "timestamp": 1754822906.1907167,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.022906608879566193,
+    "packet_info": {
+      "length": 254,
+      "time": 1499429148.472047
+    }
+  },
+  {
+    "timestamp": 1754822906.1907544,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 443,
+    "protocol": "TLS",
+    "confidence": 0.011539947241544724,
+    "packet_info": {
+      "length": 432,
+      "time": 1499429149.386024
+    }
+  },
+  {
+    "timestamp": 1754822906.1907616,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.005456352140754461,
+    "packet_info": {
+      "length": 127,
+      "time": 1499429149.389943
+    }
+  },
+  {
+    "timestamp": 1754822906.1907673,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.010951041243970394,
+    "packet_info": {
+      "length": 185,
+      "time": 1499429149.39234
+    }
+  },
+  {
+    "timestamp": 1754822906.1907747,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 53,
+    "protocol": "DNS",
+    "confidence": 0.005078114103525877,
+    "packet_info": {
+      "length": 143,
+      "time": 1499429149.43841
+    }
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "timestamp": 1754820493.330131,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 52921,
+    "protocol": "DNS",
+    "confidence": 0.033759552985429764,
+    "packet_info": {
+      "length": 76,
+      "time": 1499428865.658074
+    }
+  },
+  {
+    "timestamp": 1754820493.3301797,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 8610,
+    "protocol": "BJNP",
+    "confidence": 0.01268491055816412,
+    "packet_info": {
+      "length": 60,
+      "time": 1499428880.38264
+    }
+  },
+  {
+    "timestamp": 1754820493.3301878,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 8611,
+    "protocol": "BJNP",
+    "confidence": 0.01268491055816412,
+    "packet_info": {
+      "length": 60,
+      "time": 1499428880.48272
+    }
+  },
+  {
+    "timestamp": 1754820493.3301947,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 8612,
+    "protocol": "BJNP",
+    "confidence": 0.01268491055816412,
+    "packet_info": {
+      "length": 60,
+      "time": 1499428880.582792
+    }
+  },
+  {
+    "timestamp": 1754820493.3302019,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 8613,
+    "protocol": "BJNP",
+    "confidence": 0.01268491055816412,
+    "packet_info": {
+      "length": 60,
+      "time": 1499428880.682863
+    }
+  },
+  {
+    "timestamp": 1754820493.3302088,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 8614,
+    "protocol": "BJNP",
+    "confidence": 0.01268491055816412,
+    "packet_info": {
+      "length": 60,
+      "time": 1499428880.78294
+    }
+  },
+  {
+    "timestamp": 1754820493.3302295,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 137,
+    "protocol": "NBNS",
+    "confidence": 0.011958754621446133,
+    "packet_info": {
+      "length": 104,
+      "time": 1499428900.079014
+    }
+  }
+]

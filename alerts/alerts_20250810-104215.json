@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": 1754822535.036684,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 137,
+    "protocol": "NBNS",
+    "confidence": 0.01249611098319292,
+    "packet_info": {
+      "length": 92,
+      "time": 1499083001.708215
+    }
+  },
+  {
+    "timestamp": 1754822535.0367026,
+    "source_ip": "Flow-based",
+    "destination_ip": "Analysis",
+    "destination_port": 0,
+    "protocol": "DNS",
+    "confidence": 0.011344234459102154,
+    "packet_info": {
+      "length": 167,
+      "time": 1499083018.240468
+    }
+  }
+]
