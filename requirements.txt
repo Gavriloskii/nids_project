@@ -1,3 +1,4 @@
+# Core Dependencies
 Flask>=2.2
 pandas>=2.0
 numpy>=1.24
@@ -7,3 +8,13 @@ xgboost>=2.0
 tensorflow>=2.12
 matplotlib>=3.7
 seaborn>=0.12
+
+# Additional Production Dependencies
+joblib>=1.3.0
+requests>=2.31.0
+python-dateutil>=2.8.0
+werkzeug>=2.3.0
+
+# Network Analysis (optional but useful)
+scapy>=2.5.0
+netifaces>=0.11.0

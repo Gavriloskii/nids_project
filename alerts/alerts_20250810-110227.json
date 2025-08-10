@@ -1,0 +1,158 @@
+{
+  "session_metadata": {
+    "timestamp": "20250810-110227",
+    "model_type": "bilstm",
+    "threshold": 0.005,
+    "threshold_config": {
+      "threshold": 0.005,
+      "description": "Optimized for 94.15% accuracy with sequential detection",
+      "expected_alert_rate": "1.56% on mixed traffic",
+      "performance_notes": "Superior sequential pattern detection: 9 alerts on attack traffic, 6 on benign"
+    },
+    "total_alerts": 9,
+    "performance_metrics": {
+      "total_packets_analyzed": 10001,
+      "total_alerts": 9,
+      "processing_time": 0.0,
+      "alert_rate": 0.08999100089991001,
+      "flows_processed": 0
+    }
+  },
+  "alerts": [
+    {
+      "timestamp": 1754823747.7039864,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 138,
+      "protocol": "BROWSER",
+      "confidence": 0.02085169032216072,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 279,
+        "time": 1499428841.949002
+      }
+    },
+    {
+      "timestamp": 1754823747.704022,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 138,
+      "protocol": "BROWSER",
+      "confidence": 0.019937312230467796,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 279,
+        "time": 1499428865.668958
+      }
+    },
+    {
+      "timestamp": 1754823747.704029,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 5353,
+      "protocol": "MDNS",
+      "confidence": 0.02187698520720005,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 314,
+        "time": 1499428866.883689
+      }
+    },
+    {
+      "timestamp": 1754823747.704041,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 5353,
+      "protocol": "MDNS",
+      "confidence": 0.018609169870615005,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 197,
+        "time": 1499428868.636353
+      }
+    },
+    {
+      "timestamp": 1754823747.7040527,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 5353,
+      "protocol": "MDNS",
+      "confidence": 0.00674658315256238,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 334,
+        "time": 1499428870.419757
+      }
+    },
+    {
+      "timestamp": 1754823747.7040706,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 5353,
+      "protocol": "MDNS",
+      "confidence": 0.0073686083778738976,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 155,
+        "time": 1499428874.679418
+      }
+    },
+    {
+      "timestamp": 1754823747.7040792,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 5353,
+      "protocol": "MDNS",
+      "confidence": 0.009014168754220009,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 229,
+        "time": 1499428876.430161
+      }
+    },
+    {
+      "timestamp": 1754823747.7040966,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 5353,
+      "protocol": "MDNS",
+      "confidence": 0.04682184010744095,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 253,
+        "time": 1499428898.230266
+      }
+    },
+    {
+      "timestamp": 1754823747.7041044,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 5353,
+      "protocol": "MDNS",
+      "confidence": 0.011405713856220245,
+      "threshold_used": 0.005,
+      "alert_reason": "BiLSTM sequential pattern detection",
+      "packet_info": {
+        "length": 185,
+        "time": 1499428901.037107
+      }
+    }
+  ]
+}

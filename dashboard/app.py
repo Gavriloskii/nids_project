@@ -27,10 +27,10 @@ MODEL_CONFIG = {
         'scaler_file': 'scaler.pkl',
         'fallback_model': 'xgboost_model.json',
         'metrics': {
-            'accuracy': 0.9966,
-            'precision': 0.9846,
-            'recall': 0.9981,
-            'f1_score': 0.9913,
+            'accuracy': 0.9974,
+            'precision': 0.9911,
+            'recall': 0.9971,
+            'f1_score': 0.9941,
             'status': 'corrected_features'
         }
     },
@@ -39,10 +39,10 @@ MODEL_CONFIG = {
         'scaler_file': 'scaler.pkl',
         'fallback_model': 'bilstm_model.h5',
         'metrics': {
-            'accuracy': 0.9785,
-            'precision': 0.9058,
-            'recall': 0.9939,
-            'f1_score': 0.9478,
+            'accuracy': 0.9415,
+            'precision': 0.7988,
+            'recall': 0.9793,
+            'f1_score': 0.8799,
             'status': 'corrected_features'
         }
     }
@@ -66,7 +66,7 @@ system_status = {
 }
 
 def load_alerts(limit=100):
-    """Load alerts from JSON files with error handling"""
+    """Load alerts from JSON files with proper error handling and data validation"""
     alerts_dir = os.path.join(os.path.dirname(__file__), '..', 'alerts')
     alerts = []
     
@@ -78,60 +78,111 @@ def load_alerts(limit=100):
             file_path = os.path.join(alerts_dir, file)
             try:
                 with open(file_path, 'r') as f:
-                    file_alerts = json.load(f)
-                    # Process each alert to ensure compatibility
+                    file_data = json.load(f)
+                    
+                    # Handle both old and new alert file formats
+                    if isinstance(file_data, dict) and 'alerts' in file_data:
+                        # New format with session metadata
+                        file_alerts = file_data['alerts']
+                    elif isinstance(file_data, list):
+                        # Old format - direct list of alerts
+                        file_alerts = file_data
+                    else:
+                        logger.warning(f"Unknown alert file format in {file}: {type(file_data)}")
+                        continue
+                    
+                    # Process each alert with validation
                     for alert in file_alerts:
-                        processed_alert = process_single_alert(alert)
-                        alerts.append(processed_alert)
+                        if isinstance(alert, dict):
+                            processed_alert = process_single_alert(alert)
+                            if processed_alert:
+                                alerts.append(processed_alert)
+                        elif isinstance(alert, str):
+                            logger.warning(f"Skipping string alert in {file}: {alert[:100]}...")
+                        else:
+                            logger.warning(f"Skipping invalid alert type {type(alert)} in {file}")
+                    
                     if len(alerts) >= limit:
                         break
+                        
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON decode error in {file_path}: {str(e)}")
             except Exception as e:
                 logger.error(f"Error loading {file_path}: {str(e)}")
                 
     except Exception as e:
         logger.error(f"Alert loading failed: {str(e)}")
 
+    logger.info(f"Loaded {len(alerts)} valid alerts from {alerts_dir}")
     return alerts[:limit]
 
 def process_single_alert(alert):
-    """Process a single alert for dashboard compatibility"""
+    """Process a single alert for dashboard compatibility with comprehensive validation"""
     try:
+        # Validate that alert is a dictionary
+        if not isinstance(alert, dict):
+            logger.warning(f"Invalid alert type: {type(alert)} - {alert}")
+            return None
+        
+        # Extract and validate required fields with defaults
         processed_alert = {
-            'timestamp': alert.get('timestamp', time.time()),
-            'source_ip': alert.get('source_ip', 'Flow-based'),
-            'destination_ip': alert.get('destination_ip', 'Analysis'),
-            'destination_port': str(alert.get('destination_port', 'Unknown')),
-            'protocol': alert.get('protocol', 'Unknown'),
+            'timestamp': float(alert.get('timestamp', time.time())),
+            'source_ip': str(alert.get('source_ip', 'Flow-based')),
+            'destination_ip': str(alert.get('destination_ip', 'Analysis')),
+            'destination_port': int(alert.get('destination_port', 0)) if alert.get('destination_port') else 0,
+            'protocol': str(alert.get('protocol', 'Unknown')),
             'confidence': float(alert.get('confidence', 0.0)),
+            'model': str(alert.get('model', 'unknown')),
+            'threshold_used': float(alert.get('threshold_used', 0.0)),
+            'alert_reason': str(alert.get('alert_reason', 'ML Detection')),
             'alert_type': 'Flow-based Detection',
-            'severity': get_alert_severity(alert.get('confidence', 0.0)),
+            'severity': get_alert_severity(float(alert.get('confidence', 0.0))),
             'packet_info': alert.get('packet_info', {}),
             'detection_method': 'ML-based'
         }
+        
+        # Validate processed alert
+        if processed_alert['confidence'] < 0 or processed_alert['confidence'] > 1:
+            logger.warning(f"Invalid confidence value: {processed_alert['confidence']}")
+            processed_alert['confidence'] = max(0.0, min(1.0, processed_alert['confidence']))
+        
         return processed_alert
+        
+    except (ValueError, TypeError) as e:
+        logger.error(f"Error processing alert (data type error): {e} - Alert: {alert}")
+        return None
     except Exception as e:
-        logger.error(f"Error processing alert: {e}")
-        return alert  # Return original if processing fails
+        logger.error(f"Error processing alert (general error): {e} - Alert: {alert}")
+        return None
 
 def get_alert_severity(confidence):
     """Determine alert severity based on confidence score"""
-    if confidence >= 0.8:
-        return 'High'
-    elif confidence >= 0.5:
-        return 'Medium'
-    elif confidence >= 0.3:
-        return 'Low'
-    else:
+    try:
+        confidence = float(confidence)
+        if confidence >= 0.8:
+            return 'High'
+        elif confidence >= 0.5:
+            return 'Medium'
+        elif confidence >= 0.3:
+            return 'Low'
+        else:
+            return 'Info'
+    except (ValueError, TypeError):
         return 'Info'
 
 def process_flow_alerts(alerts):
-    """Process flow-based alerts for dashboard display"""
+    """Process flow-based alerts for dashboard display with validation"""
     processed_alerts = []
     
     for alert in alerts:
-        processed_alert = process_single_alert(alert)
-        processed_alerts.append(processed_alert)
+        if isinstance(alert, dict):
+            processed_alert = process_single_alert(alert)
+            if processed_alert:
+                processed_alerts.append(processed_alert)
+        else:
+            logger.warning(f"Skipping non-dict alert: {type(alert)} - {alert}")
     
+    logger.info(f"Processed {len(processed_alerts)} valid alerts from {len(alerts)} total")
     return processed_alerts
 
 def validate_model_files(model_type):
@@ -210,7 +261,7 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
         processed_alerts = process_flow_alerts(alerts)
         logger.info(f"Detection completed with {len(processed_alerts)} alerts")
 
-        # Update alerts
+        # Update alerts thread-safely
         with alerts_lock:
             recent_alerts = processed_alerts + recent_alerts[:100]
 
@@ -277,7 +328,7 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
         processed_alerts = process_flow_alerts(alerts)
         logger.info(f"PCAP analysis completed with {len(processed_alerts)} alerts")
 
-        # Update alerts
+        # Update alerts thread-safely
         with alerts_lock:
             recent_alerts = processed_alerts + recent_alerts[:100]
 
@@ -332,18 +383,38 @@ def api_status():
 
 @app.route('/api/alerts')
 def api_alerts():
-    """Get recent alerts with enhanced filtering"""
-    limit = min(request.args.get('limit', 50, type=int), 1000)
-    min_confidence = request.args.get('min_confidence', 0.0, type=float)
-    
-    with alerts_lock:
-        filtered_alerts = recent_alerts[:limit]
+    """Get recent alerts with enhanced filtering and validation"""
+    try:
+        limit = min(request.args.get('limit', 50, type=int), 1000)
+        min_confidence = request.args.get('min_confidence', 0.0, type=float)
         
-        # Apply confidence filter if specified
-        if min_confidence > 0:
-            filtered_alerts = [a for a in filtered_alerts if a.get('confidence', 0) >= min_confidence]
-        
-        return jsonify(filtered_alerts)
+        with alerts_lock:
+            # Load fresh alerts and combine with recent ones
+            fresh_alerts = load_alerts(limit)
+            all_alerts = fresh_alerts + recent_alerts
+            
+            # Remove duplicates based on timestamp and confidence
+            seen = set()
+            unique_alerts = []
+            for alert in all_alerts:
+                if isinstance(alert, dict):
+                    key = (alert.get('timestamp', 0), alert.get('confidence', 0))
+                    if key not in seen:
+                        seen.add(key)
+                        unique_alerts.append(alert)
+            
+            # Apply limit
+            filtered_alerts = unique_alerts[:limit]
+            
+            # Apply confidence filter if specified
+            if min_confidence > 0:
+                filtered_alerts = [a for a in filtered_alerts if a.get('confidence', 0) >= min_confidence]
+            
+            return jsonify(filtered_alerts)
+            
+    except Exception as e:
+        logger.error(f"Error in api_alerts: {e}")
+        return jsonify([])
 
 @app.route('/api/start_detection', methods=['POST'])
 def start_detection():
@@ -498,67 +569,101 @@ def api_pcap_files():
 
 @app.route('/api/stats')
 def api_stats():
-    """Get detection statistics with enhanced analytics"""
-    alerts = load_alerts(1000)
-    stats = {
-        'total_alerts': len(alerts),
-        'alert_types': {},
-        'source_ips': {},
-        'destination_ports': {},
-        'hourly_distribution': {i: 0 for i in range(24)},
-        'severity_distribution': {'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0},
-        'confidence_stats': {
-            'min': 0,
-            'max': 0,
-            'mean': 0,
-            'high_confidence_count': 0
+    """Get detection statistics with enhanced analytics and error handling"""
+    try:
+        alerts = load_alerts(1000)
+        stats = {
+            'total_alerts': len(alerts),
+            'alert_types': {},
+            'source_ips': {},
+            'destination_ports': {},
+            'hourly_distribution': {i: 0 for i in range(24)},
+            'severity_distribution': {'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0},
+            'confidence_stats': {
+                'min': 0,
+                'max': 0,
+                'mean': 0,
+                'high_confidence_count': 0
+            },
+            'model_distribution': {}
         }
-    }
 
-    confidence_values = []
-    
-    for alert in alerts:
-        # Protocol stats
-        protocol = alert.get('protocol', 'Unknown')
-        stats['alert_types'][protocol] = stats['alert_types'].get(protocol, 0) + 1
+        confidence_values = []
         
-        # Source IP stats
-        src_ip = alert.get('source_ip', 'Unknown')
-        stats['source_ips'][src_ip] = stats['source_ips'].get(src_ip, 0) + 1
-        
-        # Destination port stats
-        dst_port = str(alert.get('destination_port', 'Unknown'))
-        stats['destination_ports'][dst_port] = stats['destination_ports'].get(dst_port, 0) + 1
-        
-        # Severity distribution
-        severity = alert.get('severity', 'Info')
-        stats['severity_distribution'][severity] = stats['severity_distribution'].get(severity, 0) + 1
-        
-        # Confidence statistics
-        confidence = alert.get('confidence', 0.0)
-        confidence_values.append(confidence)
-        if confidence >= 0.8:
-            stats['confidence_stats']['high_confidence_count'] += 1
-        
-        # Time distribution
-        try:
-            hour = datetime.fromtimestamp(alert.get('timestamp', 0)).hour
-            stats['hourly_distribution'][hour] += 1
-        except:
-            pass
+        for alert in alerts:
+            try:
+                # Validate alert is a dictionary
+                if not isinstance(alert, dict):
+                    logger.warning(f"Skipping non-dict alert in stats: {type(alert)}")
+                    continue
+                
+                # Protocol stats
+                protocol = alert.get('protocol', 'Unknown')
+                stats['alert_types'][protocol] = stats['alert_types'].get(protocol, 0) + 1
+                
+                # Source IP stats
+                src_ip = alert.get('source_ip', 'Unknown')
+                stats['source_ips'][src_ip] = stats['source_ips'].get(src_ip, 0) + 1
+                
+                # Destination port stats
+                dst_port = str(alert.get('destination_port', 'Unknown'))
+                stats['destination_ports'][dst_port] = stats['destination_ports'].get(dst_port, 0) + 1
+                
+                # Model distribution
+                model = alert.get('model', 'unknown')
+                stats['model_distribution'][model] = stats['model_distribution'].get(model, 0) + 1
+                
+                # Severity distribution
+                severity = alert.get('severity', 'Info')
+                if severity in stats['severity_distribution']:
+                    stats['severity_distribution'][severity] += 1
+                else:
+                    stats['severity_distribution']['Info'] += 1
+                
+                # Confidence statistics
+                confidence = float(alert.get('confidence', 0.0))
+                confidence_values.append(confidence)
+                if confidence >= 0.8:
+                    stats['confidence_stats']['high_confidence_count'] += 1
+                
+                # Time distribution
+                try:
+                    timestamp = alert.get('timestamp', 0)
+                    if timestamp:
+                        hour = datetime.fromtimestamp(float(timestamp)).hour
+                        stats['hourly_distribution'][hour] += 1
+                except (ValueError, OSError, OverflowError):
+                    pass
 
-    # Calculate confidence statistics
-    if confidence_values:
-        stats['confidence_stats']['min'] = min(confidence_values)
-        stats['confidence_stats']['max'] = max(confidence_values)
-        stats['confidence_stats']['mean'] = sum(confidence_values) / len(confidence_values)
+            except Exception as e:
+                logger.error(f"Error processing alert in stats: {e}")
+                continue
 
-    # Sort and limit results
-    stats['alert_types'] = dict(sorted(stats['alert_types'].items(), key=lambda x: -x[1])[:10])
-    stats['source_ips'] = dict(sorted(stats['source_ips'].items(), key=lambda x: -x[1])[:10])
-    stats['destination_ports'] = dict(sorted(stats['destination_ports'].items(), key=lambda x: -x[1])[:10])
+        # Calculate confidence statistics
+        if confidence_values:
+            stats['confidence_stats']['min'] = min(confidence_values)
+            stats['confidence_stats']['max'] = max(confidence_values)
+            stats['confidence_stats']['mean'] = sum(confidence_values) / len(confidence_values)
 
-    return jsonify(stats)
+        # Sort and limit results
+        stats['alert_types'] = dict(sorted(stats['alert_types'].items(), key=lambda x: -x[1])[:10])
+        stats['source_ips'] = dict(sorted(stats['source_ips'].items(), key=lambda x: -x[1])[:10])
+        stats['destination_ports'] = dict(sorted(stats['destination_ports'].items(), key=lambda x: -x[1])[:10])
+
+        return jsonify(stats)
+        
+    except Exception as e:
+        logger.error(f"Error in api_stats: {e}", exc_info=True)
+        return jsonify({
+            'error': 'Failed to generate statistics',
+            'total_alerts': 0,
+            'alert_types': {},
+            'source_ips': {},
+            'destination_ports': {},
+            'hourly_distribution': {i: 0 for i in range(24)},
+            'severity_distribution': {'High': 0, 'Medium': 0, 'Low': 0, 'Info': 0},
+            'confidence_stats': {'min': 0, 'max': 0, 'mean': 0, 'high_confidence_count': 0}
+        }), 500
 
 @app.route('/api/model_info')
 def api_model_info():
