@@ -1,0 +1,55 @@
+{
+  "session_metadata": {
+    "timestamp": "20250818-144737",
+    "model_type": "bilstm",
+    "threshold": 0.001,
+    "threshold_config": {
+      "threshold": 0.005,
+      "description": "Optimized for 94.15% accuracy with sequential detection",
+      "expected_alert_rate": "1.56% on mixed traffic",
+      "performance_notes": "Superior sequential pattern detection: 9 alerts on attack traffic, 6 on benign"
+    },
+    "total_alerts": 2,
+    "performance_metrics": {
+      "total_packets_analyzed": 1001,
+      "total_tcp_udp_packets": 605,
+      "total_alerts": 2,
+      "processing_time": 0.0,
+      "alert_rate": 0.3305785123966942,
+      "flows_processed": 0,
+      "invalid_flows_filtered": 0
+    }
+  },
+  "alerts": [
+    {
+      "timestamp": 1755528456.8959913,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 138,
+      "protocol": "UDP",
+      "confidence": 0.02085169032216072,
+      "threshold_used": 0.001,
+      "alert_reason": "BILSTM detection",
+      "packet_info": {
+        "length": 279,
+        "time": 1499428841.949002
+      }
+    },
+    {
+      "timestamp": 1755528456.8960013,
+      "model": "bilstm",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 5353,
+      "protocol": "UDP",
+      "confidence": 0.0030190704856067896,
+      "threshold_used": 0.001,
+      "alert_reason": "BILSTM detection",
+      "packet_info": {
+        "length": 122,
+        "time": 1499428842.90385
+      }
+    }
+  ]
+}

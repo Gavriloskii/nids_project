@@ -1,0 +1,865 @@
+{
+  "session_metadata": {
+    "timestamp": "20250818-140714",
+    "model_type": "xgboost",
+    "threshold": 0.01,
+    "threshold_config": {
+      "threshold": 0.01,
+      "description": "Optimized for 99.74% accuracy with <1% false positives",
+      "expected_alert_rate": "1.21% on mixed traffic",
+      "performance_notes": "Excellent balance: 7 alerts on attack traffic, 2 on benign"
+    },
+    "total_alerts": 56,
+    "performance_metrics": {
+      "total_packets_analyzed": 914,
+      "total_tcp_udp_packets": 321,
+      "total_alerts": 56,
+      "processing_time": 31.0407292842865,
+      "alert_rate": 17.445482866043612,
+      "flows_processed": 0,
+      "invalid_flows_filtered": 0
+    }
+  },
+  "alerts": [
+    {
+      "timestamp": 1755526034.0597389,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.1961474
+      }
+    },
+    {
+      "timestamp": 1755526034.059752,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.010155018419027328,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 84,
+        "time": 1755526023.1961567
+      }
+    },
+    {
+      "timestamp": 1755526034.0597606,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.1961699
+      }
+    },
+    {
+      "timestamp": 1755526034.059768,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.011101636104285717,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 66,
+        "time": 1755526023.200749
+      }
+    },
+    {
+      "timestamp": 1755526034.0597749,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2007594
+      }
+    },
+    {
+      "timestamp": 1755526034.059782,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2007644
+      }
+    },
+    {
+      "timestamp": 1755526034.0597897,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.21532
+      }
+    },
+    {
+      "timestamp": 1755526034.0598078,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.010155018419027328,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 84,
+        "time": 1755526023.2153282
+      }
+    },
+    {
+      "timestamp": 1755526034.0598161,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.011101636104285717,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 136,
+        "time": 1755526023.215332
+      }
+    },
+    {
+      "timestamp": 1755526034.059824,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2153342
+      }
+    },
+    {
+      "timestamp": 1755526034.0598319,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.011101636104285717,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 66,
+        "time": 1755526023.2153397
+      }
+    },
+    {
+      "timestamp": 1755526034.0598388,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2153413
+      }
+    },
+    {
+      "timestamp": 1755526034.059846,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2153432
+      }
+    },
+    {
+      "timestamp": 1755526034.0598755,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.225687
+      }
+    },
+    {
+      "timestamp": 1755526034.0598812,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2256966
+      }
+    },
+    {
+      "timestamp": 1755526034.0598843,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2256997
+      }
+    },
+    {
+      "timestamp": 1755526034.0598874,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2257028
+      }
+    },
+    {
+      "timestamp": 1755526034.0598905,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.011101636104285717,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 286,
+        "time": 1755526023.2257233
+      }
+    },
+    {
+      "timestamp": 1755526034.0598931,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2257297
+      }
+    },
+    {
+      "timestamp": 1755526034.059896,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2257326
+      }
+    },
+    {
+      "timestamp": 1755526034.0598989,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.010155018419027328,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 90,
+        "time": 1755526023.2257361
+      }
+    },
+    {
+      "timestamp": 1755526034.059902,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.010155018419027328,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 90,
+        "time": 1755526023.2257419
+      }
+    },
+    {
+      "timestamp": 1755526034.059905,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2257695
+      }
+    },
+    {
+      "timestamp": 1755526034.0599077,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2257724
+      }
+    },
+    {
+      "timestamp": 1755526034.0599103,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.010034514591097832,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 92,
+        "time": 1755526023.2365644
+      }
+    },
+    {
+      "timestamp": 1755526034.0599134,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.010034514591097832,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 92,
+        "time": 1755526023.2365777
+      }
+    },
+    {
+      "timestamp": 1755526034.0599163,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2365854
+      }
+    },
+    {
+      "timestamp": 1755526034.059919,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50505,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526023.2365885
+      }
+    },
+    {
+      "timestamp": 1755526034.059922,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50507,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526024.297362
+      }
+    },
+    {
+      "timestamp": 1755526034.0599244,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50507,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526024.297424
+      }
+    },
+    {
+      "timestamp": 1755526034.0599275,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50507,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526024.2974882
+      }
+    },
+    {
+      "timestamp": 1755526034.05993,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50507,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526024.2974968
+      }
+    },
+    {
+      "timestamp": 1755526034.059933,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50507,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526024.2975054
+      }
+    },
+    {
+      "timestamp": 1755526034.0599358,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50507,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526024.2975457
+      }
+    },
+    {
+      "timestamp": 1755526034.0599387,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50507,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526024.2975545
+      }
+    },
+    {
+      "timestamp": 1755526034.059941,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50507,
+      "protocol": "UDP",
+      "confidence": 0.011101636104285717,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 66,
+        "time": 1755526024.297563
+      }
+    },
+    {
+      "timestamp": 1755526034.059944,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50509,
+      "protocol": "UDP",
+      "confidence": 0.011101636104285717,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 66,
+        "time": 1755526025.4000921
+      }
+    },
+    {
+      "timestamp": 1755526034.0599465,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50509,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526025.4001045
+      }
+    },
+    {
+      "timestamp": 1755526034.0599494,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50509,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526025.4001153
+      }
+    },
+    {
+      "timestamp": 1755526034.0599518,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50511,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526026.5005906
+      }
+    },
+    {
+      "timestamp": 1755526034.0599544,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50511,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526026.5006263
+      }
+    },
+    {
+      "timestamp": 1755526034.0599575,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50513,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526027.6012177
+      }
+    },
+    {
+      "timestamp": 1755526034.0599604,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50515,
+      "protocol": "UDP",
+      "confidence": 0.011101636104285717,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 136,
+        "time": 1755526028.7520301
+      }
+    },
+    {
+      "timestamp": 1755526034.0599632,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50509,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526028.8022177
+      }
+    },
+    {
+      "timestamp": 1755526034.0599656,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50509,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526028.8523974
+      }
+    },
+    {
+      "timestamp": 1755526034.0599682,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50511,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526028.9025621
+      }
+    },
+    {
+      "timestamp": 1755526034.059971,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50511,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526028.9527168
+      }
+    },
+    {
+      "timestamp": 1755526034.0599737,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50513,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526029.0029035
+      }
+    },
+    {
+      "timestamp": 1755526034.0599763,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50513,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526029.0530899
+      }
+    },
+    {
+      "timestamp": 1755526034.0599794,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50515,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526029.1032362
+      }
+    },
+    {
+      "timestamp": 1755526034.059983,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50515,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526029.153401
+      }
+    },
+    {
+      "timestamp": 1755526034.0599866,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50509,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526029.203558
+      }
+    },
+    {
+      "timestamp": 1755526034.0599914,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50509,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526029.713596
+      }
+    },
+    {
+      "timestamp": 1755526034.059995,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50511,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526029.8140023
+      }
+    },
+    {
+      "timestamp": 1755526034.0599995,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50513,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526029.9143417
+      }
+    },
+    {
+      "timestamp": 1755526034.0600038,
+      "model": "xgboost",
+      "source_ip": "Flow-based",
+      "destination_ip": "Analysis",
+      "destination_port": 50515,
+      "protocol": "UDP",
+      "confidence": 0.0162485484033823,
+      "threshold_used": 0.01,
+      "alert_reason": "XGBOOST detection",
+      "packet_info": {
+        "length": 42,
+        "time": 1755526030.0146894
+      }
+    }
+  ]
+}

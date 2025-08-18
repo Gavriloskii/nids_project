@@ -15,19 +15,19 @@ from tensorflow.keras.models import load_model
 
 class NetworkIntrusionDetector:
     """
-    Flow-based Network Intrusion Detection System supporting XGBoost and BiLSTM models.
+    Enhanced Flow-based Network Intrusion Detection System supporting XGBoost and BiLSTM models.
     
     Features:
-    - Bidirectional flow tracking with proper timeout handling
+    - TCP/UDP-only flow tracking for accurate intrusion detection
     - Real-time feature extraction matching training data format
     - Support for both live capture and PCAP file analysis
     - Batch processing for optimal performance
-    - Comprehensive alert generation and persistence
+    - Enhanced alert validation and filtering
     - Production-optimized thresholds based on extensive testing
     - Proper stop signal handling and resource cleanup
     """
 
-    # PRODUCTION-OPTIMIZED THRESHOLDS (Based on comprehensive testing)
+    # PRODUCTION-OPTIMIZED THRESHOLDS (Fixed HTML entities)
     OPTIMAL_THRESHOLDS = {
         'xgboost': {
             'threshold': 0.01,
@@ -68,17 +68,19 @@ class NetworkIntrusionDetector:
         print(f"   Expected Performance: {self.OPTIMAL_THRESHOLDS[self.model_type]['description']}")
         print(f"   Expected Alert Rate: {self.OPTIMAL_THRESHOLDS[self.model_type]['expected_alert_rate']}")
         
-        # Flow tracking
+        # Flow tracking - TCP/UDP only for accurate detection
         self.flows: Dict[Tuple, Dict] = {}
-        self.flow_timeout = 120  # seconds
+        self.flow_timeout = 60  # Reduced for faster nmap detection
         
         # Performance metrics
         self.performance = {
             'total_packets_analyzed': 0,
+            'total_tcp_udp_packets': 0,
             'total_alerts': 0,
             'processing_time': 0.0,
             'alert_rate': 0.0,
-            'flows_processed': 0
+            'flows_processed': 0,
+            'invalid_flows_filtered': 0
         }
         
         # Runtime state with proper stop handling
@@ -205,7 +207,10 @@ class NetworkIntrusionDetector:
         return StandardScaler()
 
     def get_flow_key(self, packet) -> Tuple[Optional[Tuple], Optional[str]]:
-        """Generate unique flow identifier for bidirectional flow tracking."""
+        """
+        Generate unique flow identifier for TCP/UDP packets only.
+        This fixes the Port 0 issue by filtering out non-TCP/UDP packets.
+        """
         try:
             if not hasattr(packet, 'ip'):
                 return None, None
@@ -213,6 +218,7 @@ class NetworkIntrusionDetector:
             src_ip = packet.ip.src
             dst_ip = packet.ip.dst
             
+            # ONLY process TCP and UDP packets - this fixes Port 0 alerts
             if hasattr(packet, 'tcp'):
                 src_port = int(packet.tcp.srcport)
                 dst_port = int(packet.tcp.dstport)
@@ -222,16 +228,12 @@ class NetworkIntrusionDetector:
                 dst_port = int(packet.udp.dstport)
                 protocol = 'UDP'
             else:
-                # For other protocols, use IP only with port 0
-                endpoint1 = (src_ip, 0)
-                endpoint2 = (dst_ip, 0)
-                if endpoint1 <= endpoint2:
-                    flow_key = (endpoint1, endpoint2, packet.highest_layer)
-                    direction = 'forward'
-                else:
-                    flow_key = (endpoint2, endpoint1, packet.highest_layer)
-                    direction = 'backward'
-                return flow_key, direction
+                # Skip ICMP, ARP, and other non-TCP/UDP packets
+                return None, None
+            
+            # Validate port numbers (1-65535)
+            if not (1 <= src_port <= 65535) or not (1 <= dst_port <= 65535):
+                return None, None
             
             # Create bidirectional flow key (smaller endpoint first for consistency)
             endpoint1 = (src_ip, src_port)
@@ -251,7 +253,7 @@ class NetworkIntrusionDetector:
             return None, None
 
     def update_flow(self, packet) -> Optional[Tuple]:
-        """Update flow statistics with new packet."""
+        """Update flow statistics with new packet - TCP/UDP only."""
         flow_key, direction = self.get_flow_key(packet)
         if flow_key is None:
             return None
@@ -276,7 +278,8 @@ class NetworkIntrusionDetector:
                     'fwd_header_lengths': [],
                     'bwd_header_lengths': [],
                     'packets': [],
-                    'endpoints': (flow_key[0], flow_key[1])
+                    'endpoints': (flow_key[0], flow_key[1]),
+                    'protocol': flow_key[2]  # Store protocol
                 }
             
             flow = self.flows[flow_key]
@@ -325,7 +328,7 @@ class NetworkIntrusionDetector:
                     'timestamp': current_time,
                     'length': packet_length,
                     'direction': direction,
-                    'protocol': packet.highest_layer
+                    'protocol': flow_key[2]
                 })
             
             return flow_key
@@ -342,7 +345,7 @@ class NetworkIntrusionDetector:
             total_packets = flow_data['fwd_packets'] + flow_data['bwd_packets']
             total_bytes = flow_data['fwd_bytes'] + flow_data['bwd_bytes']
             
-            # Get destination port from endpoints
+            # Get destination port from endpoints - guaranteed to be valid (1-65535)
             dest_port = flow_data['endpoints'][1][1]
             
             # Forward packet length statistics
@@ -492,9 +495,16 @@ class NetworkIntrusionDetector:
             time_since_last = current_time - flow_data['last_time']
             has_enough_packets = (flow_data['fwd_packets'] + flow_data['bwd_packets']) >= 1
             
+            # Validate flow has proper port information
+            dest_port = flow_data['endpoints'][1][1]
+            if dest_port == 0:
+                flows_to_remove.append(flow_key)
+                self.performance['invalid_flows_filtered'] += 1
+                continue
+            
             if (time_since_last > self.flow_timeout or force_completion) and has_enough_packets:
                 features = self.extract_flow_features(flow_data)
-                if features:
+                if features and features.get(' Destination Port', 0) > 0:
                     completed_flows.append((flow_key, features, flow_data))
                 flows_to_remove.append(flow_key)
         
@@ -537,7 +547,7 @@ class NetworkIntrusionDetector:
             return np.array([])
 
     def process_flow_batch(self, flow_features: List[Dict], flow_packets: List[Dict]) -> List[Dict]:
-        """Process a batch of flows for intrusion detection."""
+        """Process a batch of flows for intrusion detection with enhanced validation."""
         if not flow_features:
             return []
         
@@ -571,13 +581,14 @@ class NetworkIntrusionDetector:
                 predictions = (positive_probs > self.threshold).astype(int)
                 print(f"🎯 Using production threshold {self.threshold}: Found {predictions.sum()} potential intrusions")
                 
-                # Generate alerts for detected intrusions
+                # Generate alerts for detected intrusions with validation
                 for i, (pred, prob) in enumerate(zip(predictions, positive_probs)):
                     if pred == 1:
                         packet = flow_packets[i] if i < len(flow_packets) else {}
                         alert = self._create_alert('xgboost', flow_features[i], packet, float(prob))
-                        batch_alerts.append(alert)
-                        print(f"🚨 ALERT: XGBoost intrusion detected - Port: {alert['destination_port']}, Confidence: {prob:.4f}")
+                        if alert:  # Only add valid alerts
+                            batch_alerts.append(alert)
+                            print(f"🚨 ALERT: XGBoost intrusion detected - Port: {alert['destination_port']}, Confidence: {prob:.4f}")
                 
             else:  # BiLSTM
                 X_reshaped = X.reshape((X.shape[0], X.shape[1], 1))
@@ -596,13 +607,14 @@ class NetworkIntrusionDetector:
                 predictions = (raw_predictions > self.threshold).astype(int).flatten()
                 print(f"🎯 Using production threshold {self.threshold}: Found {predictions.sum()} potential intrusions")
                 
-                # Generate alerts for detected intrusions
+                # Generate alerts for detected intrusions with validation
                 for i, (pred, prob) in enumerate(zip(predictions, raw_predictions.flatten())):
                     if pred == 1:
                         packet = flow_packets[i] if i < len(flow_packets) else {}
                         alert = self._create_alert('bilstm', flow_features[i], packet, float(prob))
-                        batch_alerts.append(alert)
-                        print(f"🚨 ALERT: BiLSTM intrusion detected - Port: {alert['destination_port']}, Confidence: {prob:.4f}")
+                        if alert:  # Only add valid alerts
+                            batch_alerts.append(alert)
+                            print(f"🚨 ALERT: BiLSTM intrusion detected - Port: {alert['destination_port']}, Confidence: {prob:.4f}")
                 
         except Exception as e:
             print(f"❌ Error during prediction: {str(e)}")
@@ -610,14 +622,20 @@ class NetworkIntrusionDetector:
         print(f"✅ Batch complete. Found {len(batch_alerts)} potential intrusions.")
         return batch_alerts
 
-    def _create_alert(self, model_type: str, features: Dict, packet: Dict, confidence: float) -> Dict:
-        """Create a standardized alert dictionary."""
+    def _create_alert(self, model_type: str, features: Dict, packet: Dict, confidence: float) -> Optional[Dict]:
+        """Create a standardized alert dictionary with validation."""
+        destination_port = int(features.get(' Destination Port', 0))
+        
+        # Skip alerts for invalid ports (Port 0 issue fix)
+        if destination_port <= 0 or destination_port > 65535:
+            return None
+        
         return {
             'timestamp': time.time(),
             'model': model_type,
             'source_ip': 'Flow-based',
             'destination_ip': 'Analysis',
-            'destination_port': int(features.get(' Destination Port', 0)),
+            'destination_port': destination_port,
             'protocol': packet.get('protocol', 'Unknown'),
             'confidence': confidence,
             'threshold_used': self.threshold,
@@ -634,6 +652,7 @@ class NetworkIntrusionDetector:
         
         capture = None
         packet_count = 0
+        tcp_udp_count = 0
         total_alerts = []
         
         try:
@@ -651,10 +670,12 @@ class NetworkIntrusionDetector:
                     break
                 
                 if packet_count % 1000 == 0:
-                    print(f"   Processed {packet_count} packets...")
+                    print(f"   Processed {packet_count} packets... ({tcp_udp_count} TCP/UDP)")
                 
-                # Update flow with packet
-                self.update_flow(packet)
+                # Update flow with packet (only TCP/UDP will be processed)
+                flow_key = self.update_flow(packet)
+                if flow_key:
+                    tcp_udp_count += 1
                 
                 # Check for completed flows periodically
                 if packet_count % 500 == 0:
@@ -684,9 +705,9 @@ class NetworkIntrusionDetector:
             self.packet_count = packet_count
         
         # Update performance metrics
-        self._update_performance_metrics(packet_count, total_alerts)
+        self._update_performance_metrics(packet_count, tcp_udp_count, total_alerts)
         
-        print(f"✅ PCAP analysis complete. Processed {packet_count} packets. Found {len(total_alerts)} potential intrusions.")
+        print(f"✅ PCAP analysis complete. Processed {packet_count} packets ({tcp_udp_count} TCP/UDP). Found {len(total_alerts)} potential intrusions.")
         self.save_alerts(total_alerts)
         
         return total_alerts
@@ -699,6 +720,7 @@ class NetworkIntrusionDetector:
         self.capture_active = True
         self.stop_requested = False
         packet_count = 0
+        tcp_udp_count = 0
         total_alerts = []
         
         try:
@@ -722,7 +744,11 @@ class NetworkIntrusionDetector:
                     break
                 
                 packet_count += 1
-                self.update_flow(packet)
+                
+                # Update flow with packet (only TCP/UDP will be processed)
+                flow_key = self.update_flow(packet)
+                if flow_key:
+                    tcp_udp_count += 1
                 
                 # Check for completed flows less frequently to reduce spam
                 if packet_count % 50 == 0:
@@ -736,7 +762,7 @@ class NetworkIntrusionDetector:
                 
                 # Reduce progress spam by only printing every 500 packets
                 if packet_count % 500 == 0:
-                    print(f"   Processed {packet_count} packets... ({elapsed_time:.1f}s elapsed)")
+                    print(f"   Processed {packet_count} packets ({tcp_udp_count} TCP/UDP)... ({elapsed_time:.1f}s elapsed)")
             
             # Process remaining flows
             print("🔄 Processing remaining flows...")
@@ -766,25 +792,26 @@ class NetworkIntrusionDetector:
             
             elapsed = time.time() - self.start_time
             print(f"\n✅ Live capture completed in {elapsed:.2f} seconds.")
-            print(f"   Processed {packet_count} packets in {len(self.flows)} active flows.")
+            print(f"   Processed {packet_count} packets ({tcp_udp_count} TCP/UDP) in {len(self.flows)} active flows.")
             
             # Update performance metrics
-            self._update_performance_metrics(packet_count, total_alerts, elapsed)
+            self._update_performance_metrics(packet_count, tcp_udp_count, total_alerts, elapsed)
         
         print(f"🎯 Detection complete. Found {len(total_alerts)} potential intrusions.")
         self.save_alerts(total_alerts)
         
         return total_alerts
 
-    def _update_performance_metrics(self, packet_count: int, alerts: List[Dict], elapsed_time: float = None):
-        """Update performance metrics."""
+    def _update_performance_metrics(self, packet_count: int, tcp_udp_count: int, alerts: List[Dict], elapsed_time: float = None):
+        """Update performance metrics with enhanced tracking."""
         if elapsed_time is not None:
             self.performance['processing_time'] = elapsed_time
         self.performance['total_packets_analyzed'] = packet_count
+        self.performance['total_tcp_udp_packets'] = tcp_udp_count
         self.performance['total_alerts'] = len(alerts)
         self.performance['flows_processed'] = len(self.flows)
-        if packet_count > 0:
-            self.performance['alert_rate'] = (len(alerts) / packet_count) * 100
+        if tcp_udp_count > 0:
+            self.performance['alert_rate'] = (len(alerts) / tcp_udp_count) * 100
 
     def save_alerts(self, alerts: List[Dict]) -> None:
         """Save alerts to a JSON file with enhanced metadata for analysis."""
@@ -827,7 +854,6 @@ class NetworkIntrusionDetector:
         }
         return metrics
 
-
 def main():
     """Main function to run the Production-Ready Network Intrusion Detection System."""
     import argparse
@@ -851,7 +877,7 @@ def main():
     
     print("🛡️  " + "="*80)
     print("    AI-POWERED NETWORK INTRUSION DETECTION SYSTEM")
-    print("    Production-Ready Version with Optimized Thresholds")
+    print("    Enhanced Version with TCP/UDP Flow Filtering")
     print("="*84)
     
     # Create detector instance with production-optimized thresholds
@@ -882,7 +908,7 @@ def main():
                 pcap_files = [f for f in os.listdir('data') if f.endswith('.pcap')]
                 if pcap_files:
                     print(f"📁 Found PCAP file: {pcap_files[0]}")
-                    alerts = detector.detect_intrusions_from_file(f"data/{pcap_files[0]}", max_packets=args.max_packets)
+                    alerts = detector.detect_intrusions_from_file(f"data/{pcap_files[0]}", max_packages=args.max_packets)
                 else:
                     print("❌ No PCAP files found.")
                     alerts = []
@@ -908,9 +934,11 @@ def main():
     performance = detector.get_performance_metrics()
     print(f"\n📊 Performance Metrics:")
     print(f"   Total packets analyzed: {performance['total_packets_analyzed']:,}")
+    print(f"   TCP/UDP packets processed: {performance.get('total_tcp_udp_packets', 0):,}")
     print(f"   Total alerts generated: {performance['total_alerts']}")
     print(f"   Processing time: {performance['processing_time']:.2f} seconds")
     print(f"   Alert rate: {performance['alert_rate']:.2f}%")
+    print(f"   Invalid flows filtered: {performance.get('invalid_flows_filtered', 0)}")
     print(f"   Model: {performance['threshold_configuration']['model_type'].upper()}")
     print(f"   Threshold: {performance['threshold_configuration']['threshold']}")
     print(f"   Optimized for: {performance['threshold_configuration']['optimized_for']}")
@@ -922,7 +950,6 @@ def main():
         print("⚠️  GOOD: Alert rate acceptable for high-security environments")
     else:
         print("⚠️  HIGH: Alert rate may cause analyst fatigue - consider threshold tuning")
-
 
 if __name__ == "__main__":
     main()
