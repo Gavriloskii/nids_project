@@ -1,26 +1,27 @@
 # Multi-stage build to reduce final image size
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 WORKDIR /build
 
-# Install build dependencies
-RUN apt-get update && apt-get install -y \
+# System deps for building wheels where needed
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     gcc \
     python3-dev \
-    && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies
+# Install Python deps
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
 
 # Final production image
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install only runtime dependencies
-RUN apt-get update && apt-get install -y \
+# Runtime packages required by pyshark/tshark and troubleshooting tools
+RUN apt-get update && apt-get install -y --no-install-recommends \
     libpcap-dev \
     tshark \
     wireshark-common \
@@ -31,34 +32,34 @@ RUN apt-get update && apt-get install -y \
     iputils-ping \
     procps \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/*
 
-# Configure wireshark permissions
+# Configure wireshark permissions (allow non-root capture if desired)
 RUN echo "wireshark-common wireshark-common/install-setuid boolean true" | debconf-set-selections && \
-    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure wireshark-common
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure wireshark-common || true
 
-# Copy Python packages from builder stage
+# Copy Python environment from builder
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
 
-# Copy only essential project files (exclude .git, etc.)
+# Copy project files
 COPY src/ src/
 COPY dashboard/ dashboard/
 COPY requirements.txt .
 
-# Create alerts directory
-RUN mkdir -p /app/alerts
+# App data dirs
+RUN mkdir -p /app/alerts /app/data
 
-# Environment variables
+# Environment
 ENV PYTHONPATH=/app
 ENV FLASK_APP=dashboard/app.py
 ENV FLASK_ENV=production
 
 EXPOSE 5000
 
-# Health check
+# Healthcheck for dashboard
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:5000/api/system_health || exit 1
+  CMD curl -f http://localhost:5000/api/system_health || exit 1
 
-# Default command
-CMD ["bash", "-c", "cd /app && python dashboard/app.py & python src/realtime_detection.py --interface wlan0 --model xgboost --duration 3600 --threshold 0.01"]
+# Start only the web UI (detections are launched from the dashboard)
+CMD ["bash", "-c", "cd /app && python dashboard/app.py"]

@@ -1,0 +1,270 @@
+/* ========== Base + Theme ========== */
+:root {
+  --bg: #f5f7fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --primary: #2563eb;   /* indigo/blue */
+  --success: #16a34a;   /* green */
+  --danger: #dc2626;    /* red */
+  --warning: #f59e0b;   /* amber */
+  --info: #0ea5e9;      /* cyan */
+  --border: #e5e7eb;
+
+  --tile-bg: #f8fafc;
+  --tile-border: #e2e8f0;
+
+  --bar1: #2563eb;
+  --bar2: #7c3aed;
+  --bar3: #0891b2;
+  --bar4: #16a34a;
+  --bar5: #f59e0b;
+  --bar6: #dc2626;
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* ========== Header ========== */
+.status-pill {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--muted);
+}
+.status-idle { color: var(--muted); }
+.status-running {
+  color: #fff;
+  background: var(--success);
+  border-color: var(--success);
+  box-shadow: 0 0 0 0 rgba(22,163,74,0.6);
+  animation: pulseGreen 1.4s infinite;
+}
+.status-completed {
+  color: #fff;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.status-error {
+  color: #fff;
+  background: var(--danger);
+  border-color: var(--danger);
+}
+@keyframes pulseGreen {
+  0%   { box-shadow: 0 0 0 0 rgba(22,163,74,0.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(22,163,74,0); }
+  100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); }
+}
+
+/* ========== Cards / Containers ========== */
+.card {
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.card-chart .card-header {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+/* ========== Tiles ========== */
+.tile {
+  background: var(--tile-bg);
+  border: 1px solid var(--tile-border);
+  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  height: 100%;
+}
+.tile-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  margin-bottom: 0.15rem;
+}
+.tile-value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* ========== Progress Bars ========== */
+.progress {
+  height: 10px;
+  background: #eef2f7;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar {
+  background: var(--primary);
+}
+.bg-success.progress-bar {
+  background: var(--success) !important;
+}
+
+/* ========== Alerts Table ========== */
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #fff;
+  border-bottom: 1px solid var(--border) !important;
+}
+.table-hover tbody tr:hover {
+  background: #f8fafc;
+}
+#alertsBody tr {
+  cursor: pointer;
+}
+#alertsBody td {
+  font-size: 0.9rem;
+}
+
+/* ========== Drawer (Alert Details) ========== */
+.drawer {
+  position: fixed;
+  right: -420px;
+  top: 0;
+  height: 100vh;
+  width: 420px;
+  max-width: 95vw;
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  box-shadow: -8px 0 20px rgba(0,0,0,0.06);
+  transition: right 220ms ease-in-out;
+  z-index: 1040;
+  display: flex;
+  flex-direction: column;
+}
+.drawer.open {
+  right: 0;
+}
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .9rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: #f9fafb;
+}
+.drawer-body {
+  padding: 1rem;
+  overflow: auto;
+}
+
+/* ========== CSS Bars (Mini Charts) ========== */
+.bars {
+  display: grid;
+  gap: .5rem;
+}
+.bar-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  align-items: center;
+  gap: .5rem;
+}
+.bar-label {
+  font-size: .85rem;
+  color: var(--muted);
+}
+.bar-track {
+  background: #eef2f7;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  transition: width 300ms ease;
+}
+.bars .bar-fill.c1 { background: var(--bar1); }
+.bars .bar-fill.c2 { background: var(--bar2); }
+.bars .bar-fill.c3 { background: var(--bar3); }
+.bars .bar-fill.c4 { background: var(--bar4); }
+.bars .bar-fill.c5 { background: var(--bar5); }
+.bars .bar-fill.c6 { background: var(--bar6); }
+.bar-value {
+  font-size: .85rem;
+  color: var(--text);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* ========== Ranges / Filters ========== */
+input[type="range"].form-range {
+  accent-color: var(--primary);
+}
+
+/* ========== Buttons ========== */
+.btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.btn-outline-danger:hover {
+  color: #fff;
+}
+
+/* ========== Utilities ========== */
+.small-muted {
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+/* ========== Responsive Tweaks ========== */
+@media (max-width: 1199.98px) {
+  .drawer {
+    width: 380px;
+  }
+}
+@media (max-width: 991.98px) {
+  .drawer {
+    width: 100%;
+  }
+  .tile-value {
+    font-size: 1.3rem;
+  }
+}
+
+/* ========== Health Modal Preformatted JSON ========== */
+#healthBody {
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  color: #111827;
+  border-radius: 6px;
+}
+
+/* ========== Table Sticky Header Shadow ========== */
+.table-responsive {
+  position: relative;
+}
+.table-responsive thead.sticky-top::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: rgba(0,0,0,0.03);
+}
+
+/* ========== Focus States ========== */
+.form-control:focus, .form-select:focus, .btn:focus {
+  box-shadow: 0 0 0 .15rem rgba(37,99,235,.25);
+  border-color: rgba(37,99,235,.45);
+}
+
+/* ========== Tooltip-like helper (optional) ========== */
+.helper {
+  display: inline-block;
+  border-bottom: 1px dotted var(--muted);
+  cursor: help;
+  color: var(--muted);
+  font-size: .85rem;
+}
