@@ -1,21 +1,23 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, send_file, abort
 import os
-print(f"Current working directory: {os.getcwd()}")
 import json
 import sys
 import time
 import logging
 import threading
 import signal
-import numpy as np
 from datetime import datetime
+import csv
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Add project root to Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if PROJECT_ROOT not in sys.path:
+    sys.path.append(PROJECT_ROOT)
+
 from src.realtime_detection import NetworkIntrusionDetector
 
 app = Flask(__name__)
@@ -36,6 +38,12 @@ MODEL_CONFIG = {
     }
 }
 
+# Alerts/data directories (rollback to original ../alerts)
+DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
+ALERTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'alerts'))
+os.makedirs(ALERTS_DIR, exist_ok=True)
+os.makedirs(DATA_DIR, exist_ok=True)
+
 # Thread-safe globals with proper stop handling
 detector = None
 detection_thread = None
@@ -43,6 +51,7 @@ is_monitoring = threading.Event()
 stop_event = threading.Event()
 alerts_lock = threading.Lock()
 recent_alerts = []
+
 system_status = {
     'status': 'idle',
     'started_at': None,
@@ -57,86 +66,113 @@ system_status = {
     'stop_requested': False
 }
 
+# ---------------- Alerts helpers ----------------
+def _list_alert_files(limit=50):
+    files = []
+    try:
+        for name in os.listdir(ALERTS_DIR):
+            full = os.path.join(ALERTS_DIR, name)
+            if os.path.isfile(full) and (name.endswith('.json') or name.endswith('.ndjson') or name.endswith('.jsonl') or name.endswith('.csv')):
+                stat = os.stat(full)
+                files.append({'name': name, 'size': stat.st_size, 'modified': int(stat.st_mtime)})
+        files.sort(key=lambda x: x['modified'], reverse=True)
+    except Exception as e:
+        logger.error(f"Failed to list alerts: {e}")
+    return files[:limit]
+
+def _safe_alert_path(name: str) -> str:
+    safe = os.path.basename(name)
+    full = os.path.join(ALERTS_DIR, safe)
+    if not os.path.isfile(full):
+        abort(404)
+    return full
+
+def _iter_alert_rows(full_path: str):
+    try:
+        if full_path.endswith('.ndjson') or full_path.endswith('.jsonl'):
+            with open(full_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            yield json.loads(line)
+                        except Exception:
+                            continue
+        elif full_path.endswith('.json'):
+            with open(full_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    for r in data:
+                        yield r
+                elif isinstance(data, dict) and 'alerts' in data:
+                    for r in data['alerts']:
+                        yield r
+        elif full_path.endswith('.csv'):
+            import csv
+            with open(full_path, newline='', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for r in reader:
+                    yield r
+    except Exception as e:
+        logger.error(f"Error reading alerts file {full_path}: {e}")
+
 def load_alerts(limit=100):
-    """Load alerts from JSON files with proper error handling and data validation"""
-    alerts_dir = os.path.join(os.path.dirname(__file__), '..', 'alerts')
+    """Load alerts from newest files with validation."""
     alerts = []
     try:
-        os.makedirs(alerts_dir, exist_ok=True)
-        alert_files = sorted([f for f in os.listdir(alerts_dir) if f.endswith('.json')], reverse=True)[:5]
-        for file in alert_files:
-            file_path = os.path.join(alerts_dir, file)
-            try:
-                with open(file_path, 'r') as f:
-                    file_data = json.load(f)
-                    if isinstance(file_data, dict) and 'alerts' in file_data:
-                        file_alerts = file_data['alerts']
-                    elif isinstance(file_data, list):
-                        file_alerts = file_data
-                    else:
-                        logger.warning(f"Unknown alert file format in {file}: {type(file_data)}")
-                        continue
-                    for alert in file_alerts:
-                        if isinstance(alert, dict):
-                            processed_alert = process_single_alert(alert)
-                            if processed_alert:
-                                alerts.append(processed_alert)
-                        elif isinstance(alert, str):
-                            logger.warning(f"Skipping string alert in {file}: {alert[:100]}...")
-                        else:
-                            logger.warning(f"Skipping invalid alert type {type(alert)} in {file}")
-                    if len(alerts) >= limit:
-                        break
-            except json.JSONDecodeError as e:
-                logger.error(f"JSON decode error in {file_path}: {str(e)}")
-            except Exception as e:
-                logger.error(f"Error loading {file_path}: {str(e)}")
+        newest = _list_alert_files(limit=5)
+        for meta in newest:
+            full = _safe_alert_path(meta['name'])
+            for row in _iter_alert_rows(full):
+                pa = process_single_alert(row)
+                if pa:
+                    alerts.append(pa)
+                if len(alerts) >= limit:
+                    return alerts
     except Exception as e:
         logger.error(f"Alert loading failed: {str(e)}")
-    logger.info(f"Loaded {len(alerts)} valid alerts from {alerts_dir}")
+    logger.info(f"Loaded {len(alerts)} valid alerts from {ALERTS_DIR}")
     return alerts[:limit]
 
 def process_single_alert(alert):
-    """Process a single alert for dashboard compatibility with comprehensive validation"""
+    """Normalize a single alert for dashboard compatibility."""
     try:
         if not isinstance(alert, dict):
-            logger.warning(f"Invalid alert type: {type(alert)} - {alert}")
             return None
+        # Prefer already-correct fields; keep compatibility with alternates
+        source_ip = alert.get('source_ip') or alert.get('src_ip') or alert.get('flow_src') or 'Unknown'
+        destination_ip = alert.get('destination_ip') or alert.get('dst_ip') or alert.get('flow_dst') or 'Unknown'
         processed_alert = {
             'timestamp': float(alert.get('timestamp', time.time())),
-            'source_ip': str(alert.get('source_ip', 'Flow-based')),
-            'destination_ip': str(alert.get('destination_ip', 'Analysis')),
-            'destination_port': int(alert.get('destination_port', 0)) if alert.get('destination_port') else 0,
-            'protocol': str(alert.get('protocol', 'Unknown')),
+            'source_ip': str(source_ip),
+            'destination_ip': str(destination_ip),
+            'destination_port': int(alert.get('destination_port', alert.get('dst_port', 0)) or 0),
+            'protocol': str(alert.get('protocol', alert.get('ip_protocol', 'Unknown'))),
             'confidence': float(alert.get('confidence', 0.0)),
             'model': str(alert.get('model', 'xgboost')),
             'threshold_used': float(alert.get('threshold_used', 0.0)),
-            'alert_reason': str(alert.get('alert_reason', 'ML Detection')),
+            # Hide reason in UI: do not include alert_reason
             'alert_type': 'Flow-based Detection',
             'severity': get_alert_severity(float(alert.get('confidence', 0.0))),
             'packet_info': alert.get('packet_info', {}),
             'detection_method': 'ML-based'
         }
+        # Clamp confidence to [0,1]
         if processed_alert['confidence'] < 0 or processed_alert['confidence'] > 1:
-            logger.warning(f"Invalid confidence value: {processed_alert['confidence']}")
             processed_alert['confidence'] = max(0.0, min(1.0, processed_alert['confidence']))
         return processed_alert
-    except (ValueError, TypeError) as e:
-        logger.error(f"Error processing alert (data type error): {e} - Alert: {alert}")
-        return None
     except Exception as e:
-        logger.error(f"Error processing alert (general error): {e} - Alert: {alert}")
+        logger.error(f"Error processing alert: {e}")
         return None
 
 def get_alert_severity(confidence):
-    """Determine alert severity based on confidence score"""
     try:
-        confidence = float(confidence)
-        if confidence >= 0.8:
+        c = float(confidence)
+        if c >= 0.8:
             return 'High'
-        elif confidence >= 0.5:
+        elif c >= 0.5:
             return 'Medium'
-        elif confidence >= 0.3:
+        elif c >= 0.3:
             return 'Low'
         else:
             return 'Info'
@@ -144,23 +180,20 @@ def get_alert_severity(confidence):
         return 'Info'
 
 def process_flow_alerts(alerts):
-    """Process flow-based alerts for dashboard display with validation"""
-    processed_alerts = []
+    processed = []
     for alert in alerts:
         if isinstance(alert, dict):
-            processed_alert = process_single_alert(alert)
-            if processed_alert:
-                processed_alerts.append(processed_alert)
-        else:
-            logger.warning(f"Skipping non-dict alert: {type(alert)} - {alert}")
-    logger.info(f"Processed {len(processed_alerts)} valid alerts from {len(alerts)} total")
-    return processed_alerts
+            pa = process_single_alert(alert)
+            if pa:
+                processed.append(pa)
+    logger.info(f"Processed {len(processed)} valid alerts from {len(alerts)} total")
+    return processed
 
+# ---------------- Model files ----------------
 def validate_model_files(model_type):
-    """Validate that required model files exist (XGBoost only)"""
     config = MODEL_CONFIG.get(model_type, {})
-    model_dir = os.path.join(os.path.dirname(__file__), '..', 'models', model_type)
-    validation_result = {
+    model_dir = os.path.join(PROJECT_ROOT, 'models', model_type)
+    result = {
         'model_type': model_type,
         'model_file_exists': False,
         'scaler_file_exists': False,
@@ -171,26 +204,25 @@ def validate_model_files(model_type):
         model_path = os.path.join(model_dir, config.get('model_file', ''))
         scaler_path = os.path.join(model_dir, config.get('scaler_file', ''))
         fallback_path = os.path.join(model_dir, config.get('fallback_model', ''))
-        validation_result['model_file_exists'] = os.path.exists(model_path)
-        validation_result['scaler_file_exists'] = os.path.exists(scaler_path)
-        validation_result['fallback_available'] = os.path.exists(fallback_path)
-        if validation_result['model_file_exists'] and validation_result['scaler_file_exists']:
-            validation_result['status'] = 'corrected_ready'
-        elif validation_result['fallback_available']:
-            validation_result['status'] = 'fallback_available'
+        result['model_file_exists'] = os.path.exists(model_path)
+        result['scaler_file_exists'] = os.path.exists(scaler_path)
+        result['fallback_available'] = os.path.exists(fallback_path)
+        if result['model_file_exists'] and result['scaler_file_exists']:
+            result['status'] = 'corrected_ready'
+        elif result['fallback_available']:
+            result['status'] = 'fallback_available'
         else:
-            validation_result['status'] = 'missing_files'
+            result['status'] = 'missing_files'
     except Exception as e:
         logger.error(f"Model validation failed: {e}")
-        validation_result['status'] = 'validation_error'
-        validation_result['error'] = str(e)
-    return validation_result
+        result['status'] = 'validation_error'
+        result['error'] = str(e)
+    return result
 
+# ---------------- Background workers ----------------
 def background_detection(interface='lo', model_type='xgboost', duration=300):
-    """Run network monitoring in background thread with proper stop handling"""
     global detector, recent_alerts, system_status, stop_event
     try:
-        # Coerce model_type to xgboost only
         if model_type != 'xgboost':
             logger.warning(f"Invalid model_type '{model_type}', coercing to 'xgboost'")
             model_type = 'xgboost'
@@ -280,7 +312,6 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
                 pass
 
 def background_pcap_analysis(pcap_path, model_type, max_packets):
-    """Analyze PCAP file in background thread with proper stop handling"""
     global detector, recent_alerts, system_status, stop_event
     try:
         if model_type != 'xgboost':
@@ -350,6 +381,7 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
             'stop_requested': False
         })
 
+# ---------------- Routes ----------------
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -366,6 +398,33 @@ def api_status():
             pass
     return jsonify(system_status)
 
+# New file-based alerts endpoints (read from ../alerts)
+@app.route('/api/alerts/files', methods=['GET'])
+def api_alert_files():
+    return jsonify({'files': _list_alert_files(limit=50)})
+
+@app.route('/api/alerts/file', methods=['GET'])
+def api_alert_file_paginated():
+    name = request.args.get('name')
+    if not name:
+        abort(400)
+    offset = int(request.args.get('offset', '0'))
+    limit = int(request.args.get('limit', '100'))
+    full = _safe_alert_path(name)
+    rows = [process_single_alert(r) for r in _iter_alert_rows(full)]
+    rows = [r for r in rows if r]
+    total = len(rows)
+    page = rows[offset:offset+limit]
+    return jsonify({'name': name, 'offset': offset, 'limit': limit, 'total': total, 'rows': page})
+
+@app.route('/api/alerts/file/download', methods=['GET'])
+def api_alert_file_download():
+    name = request.args.get('name')
+    if not name:
+        abort(400)
+    full = _safe_alert_path(name)
+    return send_file(full, as_attachment=True)
+
 @app.route('/api/alerts')
 def api_alerts():
     try:
@@ -378,7 +437,7 @@ def api_alerts():
             unique_alerts = []
             for alert in all_alerts:
                 if isinstance(alert, dict):
-                    key = (alert.get('timestamp', 0), alert.get('confidence', 0))
+                    key = (alert.get('timestamp', 0), alert.get('confidence', 0), alert.get('destination_port', 0))
                     if key not in seen:
                         seen.add(key)
                         unique_alerts.append(alert)
@@ -401,7 +460,6 @@ def start_detection():
         model_type = data.get('model_type', 'xgboost')
         duration = data.get('duration', 300)
 
-        # Coerce to xgboost only
         if model_type != 'xgboost':
             model_type = 'xgboost'
 
@@ -419,9 +477,9 @@ def start_detection():
         detection_thread = threading.Thread(
             target=background_detection,
             args=(interface, model_type, duration),
-            name=f"Detection-{model_type}-{int(time.time())}"
+            name=f"Detection-{model_type}-{int(time.time())}",
+            daemon=True
         )
-        detection_thread.daemon = True
         detection_thread.start()
 
         return jsonify({
@@ -505,7 +563,6 @@ def analyze_pcap_endpoint():
         if not os.path.exists(pcap_path):
             return jsonify({'status': 'error', 'message': f'File not found: {pcap_path}'})
 
-        # Coerce to xgboost only
         if model_type != 'xgboost':
             model_type = 'xgboost'
 
@@ -523,9 +580,9 @@ def analyze_pcap_endpoint():
         detection_thread = threading.Thread(
             target=background_pcap_analysis,
             args=(pcap_path, model_type, max_packets),
-            name=f"PCAP-Analysis-{model_type}-{int(time.time())}"
+            name=f"PCAP-Analysis-{model_type}-{int(time.time())}",
+            daemon=True
         )
-        detection_thread.daemon = True
         detection_thread.start()
 
         return jsonify({
@@ -545,24 +602,31 @@ def analyze_pcap():
 
 @app.route('/api/pcap_list')
 def api_pcap_list():
-    pcap_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
     files = []
     try:
-        os.makedirs(pcap_dir, exist_ok=True)
-        for f in os.listdir(pcap_dir):
-            if f.endswith('.pcap'):
-                path = os.path.join(pcap_dir, f)
-                size_bytes = os.path.getsize(path)
-                files.append({
-                    'name': f,
-                    'path': path,
-                    'size_mb': round(size_bytes / (1024 * 1024), 2),
-                    'size_bytes': size_bytes,
-                    'modified': os.path.getmtime(path),
-                    'readable': os.access(path, os.R_OK)
-                })
+        os.makedirs(DATA_DIR, exist_ok=True)
+        search_dirs = [DATA_DIR, os.path.join(DATA_DIR, 'preprocessed_csv')]
+        seen = set()
+        for d in search_dirs:
+            if not os.path.isdir(d):
+                continue
+            for f in os.listdir(d):
+                if f.endswith('.pcap'):
+                    path = os.path.join(d, f)
+                    if path in seen:
+                        continue
+                    seen.add(path)
+                    size_bytes = os.path.getsize(path)
+                    files.append({
+                        'name': f,
+                        'path': path,
+                        'size_mb': round(size_bytes / (1024 * 1024), 2),
+                        'size_bytes': size_bytes,
+                        'modified': os.path.getmtime(path),
+                        'readable': os.access(path, os.R_OK)
+                    })
         files.sort(key=lambda x: x['modified'], reverse=True)
-        logger.info(f"Found {len(files)} PCAP files in {pcap_dir}")
+        logger.info(f"Found {len(files)} PCAP files")
     except Exception as e:
         logger.error(f"PCAP list failed: {str(e)}")
     return jsonify(files)
@@ -589,7 +653,6 @@ def api_stats():
         for alert in alerts:
             try:
                 if not isinstance(alert, dict):
-                    logger.warning(f"Skipping non-dict alert in stats: {type(alert)}")
                     continue
                 protocol = alert.get('protocol', 'Unknown')
                 stats['alert_types'][protocol] = stats['alert_types'].get(protocol, 0) + 1
@@ -602,8 +665,6 @@ def api_stats():
                 severity = alert.get('severity', 'Info')
                 if severity in stats['severity_distribution']:
                     stats['severity_distribution'][severity] += 1
-                else:
-                    stats['severity_distribution']['Info'] += 1
                 confidence = float(alert.get('confidence', 0.0))
                 confidence_values.append(confidence)
                 if confidence >= 0.8:
@@ -707,10 +768,8 @@ def system_health():
         for model_type in MODEL_CONFIG.keys():
             validation = validate_model_files(model_type)
             health['models'][model_type] = validation['status']
-        data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
-        alerts_dir = os.path.join(os.path.dirname(__file__), '..', 'alerts')
-        health['directories']['data'] = 'exists' if os.path.exists(data_dir) else 'missing'
-        health['directories']['alerts'] = 'exists' if os.path.exists(alerts_dir) else 'missing'
+        health['directories']['data'] = 'exists' if os.path.exists(DATA_DIR) else 'missing'
+        health['directories']['alerts'] = 'exists' if os.path.exists(ALERTS_DIR) else 'missing'
         health['components']['model_files'] = 'ready' if any(v == 'corrected_ready' for v in health['models'].values()) else 'degraded'
         health['components']['data_directory'] = health['directories']['data']
         health['components']['alerts_directory'] = health['directories']['alerts']
@@ -743,10 +802,10 @@ signal.signal(signal.SIGINT, shutdown_handler)
 signal.signal(signal.SIGTERM, shutdown_handler)
 
 if __name__ == '__main__':
-    os.makedirs(os.path.join(os.path.dirname(__file__), '..', 'alerts'), exist_ok=True)
-    os.makedirs(os.path.join(os.path.dirname(__file__), '..', 'data'), exist_ok=True)
-
     logger.info("🛡️  AI-Powered NIDS Dashboard Starting...")
+    logger.info(f"ALERTS_DIR: {ALERTS_DIR}")
+    logger.info(f"DATA_DIR:    {DATA_DIR}")
+
     logger.info("Model Configuration:")
     for model_type, config in MODEL_CONFIG.items():
         logger.info(f"  {model_type}: {config['model_file']} (accuracy: {config['metrics']['accuracy']})")

@@ -1,3 +1,4 @@
+from __future__ import annotations
 import os
 import time
 import json
@@ -91,6 +92,11 @@ class NetworkIntrusionDetector:
 
         # Required features list (cached for performance)
         self._required_features = self._get_required_features()
+
+        # Resolve alerts dir to the original working folder used by the app (../alerts)
+        project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self._alerts_dir = os.path.join(project_root, 'alerts')
+        os.makedirs(self._alerts_dir, exist_ok=True)
 
     def stop_detection(self):
         """Stop the current detection process gracefully."""
@@ -239,7 +245,10 @@ class NetworkIntrusionDetector:
 
         try:
             current_time = float(packet.sniff_timestamp)
-            packet_length = int(getattr(packet, 'length', 0))
+            try:
+                packet_length = int(getattr(packet, 'length', 0))
+            except Exception:
+                packet_length = 0
 
             # Initialize flow if new
             if flow_key not in self.flows:
@@ -271,13 +280,19 @@ class NetworkIntrusionDetector:
                 flow['fwd_bytes'] += packet_length
                 flow['fwd_lengths'].append(packet_length)
                 if hasattr(packet, 'tcp'):
-                    flow['fwd_header_lengths'].append(int(getattr(packet.tcp, 'hdr_len', 20)))
+                    try:
+                        flow['fwd_header_lengths'].append(int(getattr(packet.tcp, 'hdr_len', 20)))
+                    except Exception:
+                        flow['fwd_header_lengths'].append(20)
             else:
                 flow['bwd_packets'] += 1
                 flow['bwd_bytes'] += packet_length
                 flow['bwd_lengths'].append(packet_length)
                 if hasattr(packet, 'tcp'):
-                    flow['bwd_header_lengths'].append(int(getattr(packet.tcp, 'hdr_len', 20)))
+                    try:
+                        flow['bwd_header_lengths'].append(int(getattr(packet.tcp, 'hdr_len', 20)))
+                    except Exception:
+                        flow['bwd_header_lengths'].append(20)
 
             # Update TCP flags safely
             if hasattr(packet, 'tcp'):
@@ -289,7 +304,7 @@ class NetworkIntrusionDetector:
                         if isinstance(val, int):
                             return val
                         if isinstance(val, str):
-                            return 1 if val.lower() == 'true' else 0
+                            return 1 if val.lower() == 'true' or val == '1' else 0
                         return 0
                     except Exception:
                         return 0
@@ -351,10 +366,10 @@ class NetworkIntrusionDetector:
             timestamps = flow_data['timestamps']
             if len(timestamps) > 1:
                 iats = np.diff(timestamps)
-                iat_mean = np.mean(iats) * 1000000  # Convert to microseconds
-                iat_std = np.std(iats) * 1000000
-                iat_max = max(iats) * 1000000
-                iat_min = min(iats) * 1000000
+                iat_mean = np.mean(iats) * 1_000_000  # Convert to microseconds
+                iat_std = np.std(iats) * 1_000_000
+                iat_max = max(iats) * 1_000_000
+                iat_min = min(iats) * 1_000_000
             else:
                 iat_mean = iat_std = iat_max = iat_min = 0
 
@@ -379,7 +394,7 @@ class NetworkIntrusionDetector:
             # Build feature dictionary matching training format
             features = {
                 ' Destination Port': dest_port,
-                ' Flow Duration': duration * 1000000,  # Convert to microseconds
+                ' Flow Duration': duration * 1_000_000,  # Convert to microseconds
                 ' Total Fwd Packets': flow_data['fwd_packets'],
                 ' Total Backward Packets': flow_data['bwd_packets'],
                 'Total Length of Fwd Packets': flow_data['fwd_bytes'],
@@ -427,8 +442,8 @@ class NetworkIntrusionDetector:
                 ' PSH Flag Count': tcp_flags['psh'],
                 ' ACK Flag Count': tcp_flags['ack'],
                 ' URG Flag Count': tcp_flags['urg'],
-                ' CWE Flag Count': tcp_flags['cwe'],
-                ' ECE Flag Count': tcp_flags['ece'],
+                ' CWE Flag Count': 0,  # Set to 0 to avoid KeyError and undefined flag counts
+                ' ECE Flag Count': 0,  # Set to 0 to avoid KeyError and undefined flag counts
                 ' Down/Up Ratio': (flow_data['bwd_bytes'] / flow_data['fwd_bytes']) if flow_data['fwd_bytes'] > 0 else 0,
                 ' Average Packet Size': all_mean
             }
@@ -470,7 +485,7 @@ class NetworkIntrusionDetector:
         completed_flows = []
         flows_to_remove = []
 
-        for flow_key, flow_data in self.flows.items():
+        for flow_key, flow_data in list(self.flows.items()):
             time_since_last = current_time - flow_data['last_time']
             has_enough_packets = (flow_data['fwd_packets'] + flow_data['bwd_packets']) >= 1
 
@@ -489,7 +504,7 @@ class NetworkIntrusionDetector:
 
         # Remove completed flows
         for flow_key in flows_to_remove:
-            del self.flows[flow_key]
+            self.flows.pop(flow_key, None)
 
         return completed_flows
 
@@ -573,6 +588,26 @@ class NetworkIntrusionDetector:
         print(f"✅ Batch complete. Found {len(batch_alerts)} potential intrusions.")
         return batch_alerts
 
+    def _attach_ips_to_packet(self, flow_key: Tuple, packet_stub: Dict) -> Dict:
+        """Attach source/destination IPs to a packet stub using flow_key and stored direction."""
+        pkt = dict(packet_stub)
+        try:
+            (ip1, _p1), (ip2, _p2), _proto = flow_key
+            direction = pkt.get('direction')
+            if direction == 'forward':
+                pkt['source_ip'] = ip1
+                pkt['destination_ip'] = ip2
+            elif direction == 'backward':
+                pkt['source_ip'] = ip2
+                pkt['destination_ip'] = ip1
+            else:
+                pkt['source_ip'] = ip1
+                pkt['destination_ip'] = ip2
+        except Exception:
+            pkt.setdefault('source_ip', 'Unknown')
+            pkt.setdefault('destination_ip', 'Unknown')
+        return pkt
+
     def _create_alert(self, model_type: str, features: Dict, packet: Dict, confidence: float) -> Optional[Dict]:
         """Create a standardized alert dictionary with validation."""
         destination_port = int(features.get(' Destination Port', 0))
@@ -581,16 +616,20 @@ class NetworkIntrusionDetector:
         if destination_port <= 0 or destination_port > 65535:
             return None
 
+        # Include real IPs if available (attached earlier)
+        source_ip = packet.get('source_ip', 'Unknown')
+        destination_ip = packet.get('destination_ip', 'Unknown')
+
         return {
             'timestamp': time.time(),
             'model': model_type,
-            'source_ip': 'Flow-based',
-            'destination_ip': 'Analysis',
+            'source_ip': source_ip,
+            'destination_ip': destination_ip,
             'destination_port': destination_port,
             'protocol': packet.get('protocol', 'Unknown'),
             'confidence': confidence,
             'threshold_used': self.threshold,
-            'alert_reason': f'{model_type.upper()} detection',
+            # Reason omitted intentionally
             'packet_info': {
                 'length': packet.get('length', 0),
                 'time': packet.get('timestamp', 0)
@@ -633,8 +672,10 @@ class NetworkIntrusionDetector:
                     completed_flows = self.get_completed_flows()
                     if completed_flows:
                         flow_features = [features for _, features, _ in completed_flows]
-                        flow_packets = [flow_data['packets'][0] if flow_data['packets'] else {}
-                                        for _, _, flow_data in completed_flows]
+                        flow_packets = []
+                        for fk, _, flow_data in completed_flows:
+                            stub = flow_data['packets'][0] if flow_data['packets'] else {}
+                            flow_packets.append(self._attach_ips_to_packet(fk, stub))
                         alerts = self.process_flow_batch(flow_features, flow_packets)
                         total_alerts.extend(alerts)
 
@@ -643,8 +684,10 @@ class NetworkIntrusionDetector:
             completed_flows = self.get_completed_flows(force_completion=True)
             if completed_flows:
                 flow_features = [features for _, features, _ in completed_flows]
-                flow_packets = [flow_data['packets'][0] if flow_data['packets'] else {}
-                                for _, _, flow_data in completed_flows]
+                flow_packets = []
+                for fk, _, flow_data in completed_flows:
+                    stub = flow_data['packets'][0] if flow_data['packets'] else {}
+                    flow_packets.append(self._attach_ips_to_packet(fk, stub))
                 alerts = self.process_flow_batch(flow_features, flow_packets)
                 total_alerts.extend(alerts)
 
@@ -652,7 +695,10 @@ class NetworkIntrusionDetector:
             print(f"❌ Error during PCAP analysis: {e}")
         finally:
             if capture:
-                capture.close()
+                try:
+                    capture.close()
+                except Exception:
+                    pass
             self.packet_count = packet_count
 
         # Update performance metrics
@@ -702,17 +748,19 @@ class NetworkIntrusionDetector:
                     tcp_udp_count += 1
 
                 # Check for completed flows less frequently to reduce spam
-                if packet_count % 50 == 0:
+                if packet_count % 100 == 0:
                     completed_flows = self.get_completed_flows()
                     if completed_flows:
                         flow_features = [features for _, features, _ in completed_flows]
-                        flow_packets = [flow_data['packets'][0] if flow_data['packets'] else {}
-                                        for _, _, flow_data in completed_flows]
+                        flow_packets = []
+                        for fk, _, flow_data in completed_flows:
+                            stub = flow_data['packets'][0] if flow_data['packets'] else {}
+                            flow_packets.append(self._attach_ips_to_packet(fk, stub))
                         alerts = self.process_flow_batch(flow_features, flow_packets)
                         total_alerts.extend(alerts)
 
-                # Reduce progress spam by only printing every 500 packets
-                if packet_count % 500 == 0:
+                # Reduce progress spam by only printing every 1000 packets
+                if packet_count % 1000 == 0:
                     print(f"   Processed {packet_count} packets ({tcp_udp_count} TCP/UDP)... ({elapsed_time:.1f}s elapsed)")
 
             # Process remaining flows
@@ -720,8 +768,10 @@ class NetworkIntrusionDetector:
             completed_flows = self.get_completed_flows(force_completion=True)
             if completed_flows:
                 flow_features = [features for _, features, _ in completed_flows]
-                flow_packets = [flow_data['packets'][0] if flow_data['packets'] else {}
-                                for _, _, flow_data in completed_flows]
+                flow_packets = []
+                for fk, _, flow_data in completed_flows:
+                    stub = flow_data['packets'][0] if flow_data['packets'] else {}
+                    flow_packets.append(self._attach_ips_to_packet(fk, stub))
                 alerts = self.process_flow_batch(flow_features, flow_packets)
                 total_alerts.extend(alerts)
 
@@ -765,14 +815,13 @@ class NetworkIntrusionDetector:
             self.performance['alert_rate'] = (len(alerts) / tcp_udp_count) * 100
 
     def save_alerts(self, alerts: List[Dict]) -> None:
-        """Save alerts to a JSON file with enhanced metadata for analysis."""
+        """Save alerts to a JSON file with enhanced metadata for analysis (original ../alerts folder)."""
         if not alerts:
             return
 
         try:
-            os.makedirs('alerts', exist_ok=True)
             timestamp = time.strftime("%Y%m%d-%H%M%S")
-            filename = f"alerts/alerts_{timestamp}.json"
+            filename = os.path.join(self._alerts_dir, f"alerts_{timestamp}.json")
 
             # Add session metadata
             session_info = {
@@ -787,7 +836,7 @@ class NetworkIntrusionDetector:
                 'alerts': alerts
             }
 
-            with open(filename, 'w') as f:
+            with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(session_info, f, indent=2, default=str)
 
             print(f"💾 Alerts saved to {filename}")
@@ -857,10 +906,12 @@ def main():
 
             # Fall back to PCAP file analysis
             try:
-                pcap_files = [f for f in os.listdir('data') if f.endswith('.pcap')]
+                data_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data')
+                pcap_files = [f for f in os.listdir(data_dir) if f.endswith('.pcap')]
                 if pcap_files:
-                    print(f"📁 Found PCAP file: {pcap_files[0]}")
-                    alerts = detector.detect_intrusions_from_file(f"data/{pcap_files}", max_packets=args.max_packets)
+                    first = os.path.join(data_dir, pcap_files[0])
+                    print(f"📁 Found PCAP file: {first}")
+                    alerts = detector.detect_intrusions_from_file(first, max_packets=args.max_packets)
                 else:
                     print("❌ No PCAP files found.")
                     alerts = []

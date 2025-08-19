@@ -22,3 +22,5 @@ temp_capture.pcap
 
 # Jupyter notebook checkpoints
 .ipynb_checkpoints/" > .gitignore
+
+alerts*.json
