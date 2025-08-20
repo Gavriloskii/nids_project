@@ -38,7 +38,7 @@ MODEL_CONFIG = {
     }
 }
 
-# Alerts/data directories (rollback to original ../alerts)
+# Alerts/data directories (use single ../alerts)
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
 ALERTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'alerts'))
 os.makedirs(ALERTS_DIR, exist_ok=True)
@@ -72,7 +72,12 @@ def _list_alert_files(limit=50):
     try:
         for name in os.listdir(ALERTS_DIR):
             full = os.path.join(ALERTS_DIR, name)
-            if os.path.isfile(full) and (name.endswith('.json') or name.endswith('.ndjson') or name.endswith('.jsonl') or name.endswith('.csv')):
+            if os.path.isfile(full) and (
+                name.endswith('.json')
+                or name.endswith('.ndjson')
+                or name.endswith('.jsonl')
+                or name.endswith('.csv')
+            ):
                 stat = os.stat(full)
                 files.append({'name': name, 'size': stat.st_size, 'modified': int(stat.st_mtime)})
         files.sort(key=lambda x: x['modified'], reverse=True)
@@ -108,7 +113,6 @@ def _iter_alert_rows(full_path: str):
                     for r in data['alerts']:
                         yield r
         elif full_path.endswith('.csv'):
-            import csv
             with open(full_path, newline='', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 for r in reader:
