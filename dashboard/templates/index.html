@@ -31,8 +31,8 @@
     </div>
 
     <div class="row g-3">
-      <!-- Main content -->
-      <div class="col-12 col-xl-9">
+      <!-- Main content (full width) -->
+      <div class="col-12">
         <!-- Tabs -->
         <ul class="nav nav-tabs" id="mainTabs" role="tablist">
           <li class="nav-item" role="presentation">
@@ -70,13 +70,8 @@
               </div>
             </div>
 
-            <!-- Progress -->
-            <div class="progress mt-3" role="progressbar" aria-label="Realtime progress">
-              <div id="rtProgress" class="progress-bar progress-bar-striped" style="width: 0%"></div>
-            </div>
-
             <!-- Tiles -->
-            <div class="row g-3 mt-1">
+            <div class="row g-3 mt-3">
               <div class="col-6 col-lg-3">
                 <div class="tile">
                   <div class="tile-label">Packets</div>
@@ -155,13 +150,8 @@
               </div>
             </div>
 
-            <!-- Progress -->
-            <div class="progress mt-3" role="progressbar" aria-label="PCAP progress">
-              <div id="pcProgress" class="progress-bar progress-bar-striped bg-success" style="width: 0%"></div>
-            </div>
-
             <!-- Tiles -->
-            <div class="row g-3 mt-1">
+            <div class="row g-3 mt-3">
               <div class="col-6 col-lg-3">
                 <div class="tile">
                   <div class="tile-label">Packets</div>
@@ -219,81 +209,6 @@
               </div>
             </div>
           </div> <!-- end PCAP tab -->
-        </div>
-      </div>
-
-      <!-- Alerts panel -->
-      <div class="col-12 col-xl-3">
-        <div class="card">
-          <div class="card-header d-flex align-items-center py-2">
-            <i class="fa-solid fa-bell me-2"></i> Alerts
-            <div class="ms-auto d-flex align-items-center">
-              <small class="text-muted me-2">Min conf.</small>
-              <input id="minConfidence" type="range" class="form-range me-2" min="0" max="10" step="0.1" value="0" style="width: 120px;">
-              <span id="minConfidenceLabel" class="badge bg-secondary">0.0%</span>
-            </div>
-          </div>
-          <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 460px; overflow:auto;">
-              <table class="table table-sm table-hover align-middle mb-0">
-                <thead class="table-light sticky-top">
-                  <tr>
-                    <th>Time</th>
-                    <th>Proto</th>
-                    <th>Port</th>
-                    <th>Conf.</th>
-                  </tr>
-                </thead>
-                <tbody id="alertsBody">
-                  <tr><td colspan="4" class="text-center py-3">No alerts yet</td></tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="d-flex justify-content-between align-items-center p-2 border-top">
-              <div class="d-flex align-items-center">
-                <small class="text-muted me-2">Limit</small>
-                <select id="limitSelect" class="form-select form-select-sm" style="width: 90px;">
-                  <option>50</option>
-                  <option selected>100</option>
-                  <option>500</option>
-                </select>
-              </div>
-              <div>
-                <button id="refreshAlertsBtn" class="btn btn-sm btn-outline-secondary">
-                  <i class="fa-solid fa-rotate-right me-1"></i> Refresh
-                </button>
-                <div class="form-check form-check-inline ms-2">
-                  <input id="autoRefreshToggle" class="form-check-input" type="checkbox" checked>
-                  <label class="form-check-label small" for="autoRefreshToggle">Auto</label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Details drawer -->
-        <div id="alertDrawer" class="drawer">
-          <div class="drawer-header">
-            <strong>Alert Details</strong>
-            <button id="drawerClose" class="btn-close"></button>
-          </div>
-          <div class="drawer-body">
-            <div class="mb-2"><span class="text-muted small">Time:</span> <div id="dTime" class="fw-semibold"></div></div>
-            <div class="mb-2"><span class="text-muted small">Protocol:</span> <div id="dProtocol"></div></div>
-            <div class="mb-2"><span class="text-muted small">Destination Port:</span> <div id="dPort"></div></div>
-            <div class="mb-2"><span class="text-muted small">Confidence:</span> <div id="dConfidence"></div></div>
-            <div class="mb-2"><span class="text-muted small">Threshold:</span> <div id="dThreshold"></div></div>
-            <div class="mb-2"><span class="text-muted small">Reason:</span> <div id="dReason"></div></div>
-            <div class="mb-2"><span class="text-muted small">Packet Length:</span> <div id="dPacketLen"></div></div>
-            <div class="mb-2"><span class="text-muted small">Packet Time:</span> <div id="dPacketTime"></div></div>
-            <div class="mb-3">
-              <span class="text-muted small">Raw JSON:</span>
-              <pre id="dJson" class="small bg-light p-2 rounded" style="max-height: 180px; overflow:auto;"></pre>
-            </div>
-            <button id="copyJsonBtn" class="btn btn-sm btn-outline-primary">
-              <i class="fa-regular fa-copy me-1"></i> Copy JSON
-            </button>
-          </div>
         </div>
       </div>
     </div>

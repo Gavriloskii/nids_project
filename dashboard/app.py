@@ -38,13 +38,21 @@ MODEL_CONFIG = {
     }
 }
 
-# Alerts/data directories (use single ../alerts)
+# Alerts/data directories
 DATA_DIR = os.path.join(PROJECT_ROOT, 'data')
-ALERTS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'alerts'))
-os.makedirs(ALERTS_DIR, exist_ok=True)
+# Align alerts dir with detector (which saves to ../alerts relative to src): absolute is safest in container
+ALERTS_DIR = "/app/alerts"
+try:
+    os.makedirs(ALERTS_DIR, exist_ok=True)
+except Exception as e:
+    logger.warning(f"Could not create ALERTS_DIR at {ALERTS_DIR}: {e}")
+    # Fallback to project_root/alerts
+    ALERTS_DIR = os.path.join(PROJECT_ROOT, 'alerts')
+    os.makedirs(ALERTS_DIR, exist_ok=True)
+
 os.makedirs(DATA_DIR, exist_ok=True)
 
-# Thread-safe globals with proper stop handling
+# Thread-safe globals
 detector = None
 detection_thread = None
 is_monitoring = threading.Event()
@@ -63,13 +71,20 @@ system_status = {
     'model_version': 'corrected',
     'feature_extraction': 'flow_based',
     'can_stop': False,
-    'stop_requested': False
+    'stop_requested': False,
+    'file_created_for_last_run': False,
+    'last_alert_file_name': None,
+    'last_alert_file_mtime': None,
+    'last_alert_file_size': None,
 }
 
 # ---------------- Alerts helpers ----------------
 def _list_alert_files(limit=50):
     files = []
     try:
+        if not os.path.isdir(ALERTS_DIR):
+            logger.warning(f"Alerts directory does not exist: {ALERTS_DIR}")
+            return []
         for name in os.listdir(ALERTS_DIR):
             full = os.path.join(ALERTS_DIR, name)
             if os.path.isfile(full) and (
@@ -78,17 +93,20 @@ def _list_alert_files(limit=50):
                 or name.endswith('.jsonl')
                 or name.endswith('.csv')
             ):
-                stat = os.stat(full)
-                files.append({'name': name, 'size': stat.st_size, 'modified': int(stat.st_mtime)})
+                try:
+                    stat = os.stat(full)
+                    files.append({'name': name, 'size': stat.st_size, 'modified': int(stat.st_mtime)})
+                except Exception as e:
+                    logger.error(f"stat failed for {full}: {e}")
         files.sort(key=lambda x: x['modified'], reverse=True)
     except Exception as e:
-        logger.error(f"Failed to list alerts: {e}")
+        logger.error(f"Failed to list alerts: {e}", exc_info=True)
     return files[:limit]
 
 def _safe_alert_path(name: str) -> str:
-    safe = os.path.basename(name)
+    safe = os.path.basename(name or '')
     full = os.path.join(ALERTS_DIR, safe)
-    if not os.path.isfile(full):
+    if not (safe and os.path.isfile(full)):
         abort(404)
     return full
 
@@ -110,7 +128,7 @@ def _iter_alert_rows(full_path: str):
                     for r in data:
                         yield r
                 elif isinstance(data, dict) and 'alerts' in data:
-                    for r in data['alerts']:
+                    for r in data.get('alerts') or []:
                         yield r
         elif full_path.endswith('.csv'):
             with open(full_path, newline='', encoding='utf-8') as f:
@@ -118,7 +136,7 @@ def _iter_alert_rows(full_path: str):
                 for r in reader:
                     yield r
     except Exception as e:
-        logger.error(f"Error reading alerts file {full_path}: {e}")
+        logger.error(f"Error reading alerts file {full_path}: {e}", exc_info=True)
 
 def load_alerts(limit=100):
     """Load alerts from newest files with validation."""
@@ -134,7 +152,7 @@ def load_alerts(limit=100):
                 if len(alerts) >= limit:
                     return alerts
     except Exception as e:
-        logger.error(f"Alert loading failed: {str(e)}")
+        logger.error(f"Alert loading failed: {str(e)}", exc_info=True)
     logger.info(f"Loaded {len(alerts)} valid alerts from {ALERTS_DIR}")
     return alerts[:limit]
 
@@ -143,7 +161,6 @@ def process_single_alert(alert):
     try:
         if not isinstance(alert, dict):
             return None
-        # Prefer already-correct fields; keep compatibility with alternates
         source_ip = alert.get('source_ip') or alert.get('src_ip') or alert.get('flow_src') or 'Unknown'
         destination_ip = alert.get('destination_ip') or alert.get('dst_ip') or alert.get('flow_dst') or 'Unknown'
         processed_alert = {
@@ -155,13 +172,11 @@ def process_single_alert(alert):
             'confidence': float(alert.get('confidence', 0.0)),
             'model': str(alert.get('model', 'xgboost')),
             'threshold_used': float(alert.get('threshold_used', 0.0)),
-            # Hide reason in UI: do not include alert_reason
             'alert_type': 'Flow-based Detection',
             'severity': get_alert_severity(float(alert.get('confidence', 0.0))),
             'packet_info': alert.get('packet_info', {}),
             'detection_method': 'ML-based'
         }
-        # Clamp confidence to [0,1]
         if processed_alert['confidence'] < 0 or processed_alert['confidence'] > 1:
             processed_alert['confidence'] = max(0.0, min(1.0, processed_alert['confidence']))
         return processed_alert
@@ -223,8 +238,32 @@ def validate_model_files(model_type):
         result['error'] = str(e)
     return result
 
+# ---------------- File check helper ----------------
+def _snapshot_latest_file():
+    files = _list_alert_files(limit=1)
+    return files[0] if files else None
+
+def _update_last_file_status(before: dict | None):
+    """Compare newest file now vs. 'before' snapshot and update system_status."""
+    after = _snapshot_latest_file()
+    before = before if isinstance(before, dict) else None
+    created = False
+    if isinstance(after, dict):
+        if before is None:
+            created = True
+        else:
+            created = (
+                after.get('name') != before.get('name')
+                or int(after.get('modified', 0)) > int(before.get('modified', 0))
+            )
+    system_status['file_created_for_last_run'] = bool(created)
+    system_status['last_alert_file_name'] = after.get('name') if isinstance(after, dict) else None
+    system_status['last_alert_file_mtime'] = after.get('modified') if isinstance(after, dict) else None
+    system_status['last_alert_file_size'] = after.get('size') if isinstance(after, dict) else None
+    logger.info(f"Post-run file check: created={created}, file={after}")
+
 # ---------------- Background workers ----------------
-def background_detection(interface='lo', model_type='xgboost', duration=300):
+def background_detection(interface='lo', model_type='xgboost', duration=300, threshold: float | None = None):
     global detector, recent_alerts, system_status, stop_event
     try:
         if model_type != 'xgboost':
@@ -234,6 +273,8 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
         logger.info(f"Starting {model_type} detection on {interface} (flow-based model)")
         validation = validate_model_files(model_type)
         logger.info(f"Model validation result: {validation}")
+
+        before_file = _snapshot_latest_file()
 
         system_status.update({
             'status': 'running',
@@ -250,34 +291,40 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
             'model_validation': validation
         })
 
-        detector = NetworkIntrusionDetector(interface=interface, model_type='xgboost')
+        detector = NetworkIntrusionDetector(interface=interface, model_type='xgboost', threshold=threshold)
         logger.info("Model loaded successfully")
 
         alerts = []
         start_time = time.time()
-        while not stop_event.is_set() and (time.time() - start_time) < duration:
+        while not stop_event.is_set():
+            elapsed = time.time() - start_time
+            remaining = duration - elapsed
+            if remaining <= 0:
+                break
+            mini_duration = min(30, int(remaining))
+            if mini_duration < 1:
+                break
+
             try:
-                mini_duration = min(30, duration - (time.time() - start_time))
-                if mini_duration <= 0:
-                    break
-                batch_alerts = detector.detect_intrusions(duration=int(mini_duration))
+                batch_alerts = detector.detect_intrusions(duration=mini_duration)
+                logger.info(f"mini-run alerts: +{len(batch_alerts)}")
                 alerts.extend(batch_alerts)
-                elapsed = time.time() - start_time
-                progress = min(100, (elapsed / duration) * 100)
-                system_status['progress'] = progress
+                logger.info(f"accumulated alerts so far: {len(alerts)}")
+                system_status['progress'] = min(100, (elapsed / duration) * 100)
                 if stop_event.is_set():
                     logger.info("Stop event detected in detection loop")
                     break
             except Exception as e:
-                logger.error(f"Error in detection mini-loop: {e}")
+                logger.error(f"Error in detection mini-loop: {e}", exc_info=True)
                 break
 
         if detector:
             remaining_flows = detector.stop_detection()
             logger.info(f"Forced stop completed, processed {remaining_flows} remaining flows")
 
+        logger.info(f"end-of-run raw alerts before normalization: {len(alerts)}")
         processed_alerts = process_flow_alerts(alerts)
-        logger.info(f"Detection completed with {len(processed_alerts)} alerts")
+        logger.info(f"Detection completed with {len(processed_alerts)} alerts (normalized)")
 
         with alerts_lock:
             recent_alerts = processed_alerts + recent_alerts[:100]
@@ -292,6 +339,8 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
             'performance_metrics': performance,
             'can_stop': False
         })
+
+        _update_last_file_status(before_file)
 
     except Exception as e:
         logger.error(f"Detection failed: {str(e)}", exc_info=True)
@@ -315,7 +364,7 @@ def background_detection(interface='lo', model_type='xgboost', duration=300):
             except:
                 pass
 
-def background_pcap_analysis(pcap_path, model_type, max_packets):
+def background_pcap_analysis(pcap_path, model_type, max_packets, threshold: float | None = None):
     global detector, recent_alerts, system_status, stop_event
     try:
         if model_type != 'xgboost':
@@ -325,6 +374,8 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
         logger.info(f"Starting PCAP analysis of {pcap_path} with {model_type}")
         validation = validate_model_files(model_type)
         logger.info(f"Model validation result: {validation}")
+
+        before_file = _snapshot_latest_file()
 
         system_status.update({
             'status': 'analyzing_pcap',
@@ -343,7 +394,7 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
             'model_validation': validation
         })
 
-        detector = NetworkIntrusionDetector(model_type='xgboost')
+        detector = NetworkIntrusionDetector(model_type='xgboost', threshold=threshold)
         alerts = detector.detect_intrusions_from_file(pcap_path, max_packets=max_packets)
 
         if stop_event.is_set():
@@ -351,8 +402,9 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
             if detector:
                 detector.stop_detection()
 
+        logger.info(f"end-of-run raw alerts before normalization: {len(alerts)}")
         processed_alerts = process_flow_alerts(alerts)
-        logger.info(f"PCAP analysis completed with {len(processed_alerts)} alerts")
+        logger.info(f"PCAP analysis completed with {len(processed_alerts)} alerts (normalized)")
 
         with alerts_lock:
             recent_alerts = processed_alerts + recent_alerts[:100]
@@ -367,6 +419,8 @@ def background_pcap_analysis(pcap_path, model_type, max_packets):
             'performance_metrics': performance,
             'can_stop': False
         })
+
+        _update_last_file_status(before_file)
 
     except Exception as e:
         logger.error(f"PCAP analysis failed: {str(e)}", exc_info=True)
@@ -394,26 +448,30 @@ def index():
 def api_status():
     system_status['is_monitoring'] = is_monitoring.is_set()
     system_status['timestamp'] = time.time()
+    # Always expose the newest alerts filename for the frontend to pick up reliably
+    latest_meta = _snapshot_latest_file()
+    system_status['latest_alerts_file'] = latest_meta.get('name') if isinstance(latest_meta, dict) else None
     if detector:
         try:
             performance = detector.get_performance_metrics()
             system_status['current_performance'] = performance
-        except:
+        except Exception:
             pass
     return jsonify(system_status)
 
-# New file-based alerts endpoints (read from ../alerts)
+# File-based alerts endpoints
 @app.route('/api/alerts/files', methods=['GET'])
 def api_alert_files():
-    return jsonify({'files': _list_alert_files(limit=50)})
+    files = _list_alert_files(limit=50)
+    return jsonify({'files': files})
 
 @app.route('/api/alerts/file', methods=['GET'])
 def api_alert_file_paginated():
     name = request.args.get('name')
     if not name:
         abort(400)
-    offset = int(request.args.get('offset', '0'))
-    limit = int(request.args.get('limit', '100'))
+    offset = max(0, int(request.args.get('offset', '0')))
+    limit = max(1, min(10000, int(request.args.get('limit', '100'))))
     full = _safe_alert_path(name)
     rows = [process_single_alert(r) for r in _iter_alert_rows(full)]
     rows = [r for r in rows if r]
@@ -441,7 +499,13 @@ def api_alerts():
             unique_alerts = []
             for alert in all_alerts:
                 if isinstance(alert, dict):
-                    key = (alert.get('timestamp', 0), alert.get('confidence', 0), alert.get('destination_port', 0))
+                    key = (
+                        alert.get('source_ip', 'Unknown'),
+                        alert.get('destination_ip', 'Unknown'),
+                        alert.get('destination_port', 0),
+                        alert.get('protocol', 'Unknown'),
+                        round(float(alert.get('confidence', 0.0)), 4)
+                    )
                     if key not in seen:
                         seen.add(key)
                         unique_alerts.append(alert)
@@ -450,7 +514,7 @@ def api_alerts():
                 filtered_alerts = [a for a in filtered_alerts if a.get('confidence', 0) >= min_confidence]
             return jsonify(filtered_alerts)
     except Exception as e:
-        logger.error(f"Error in api_alerts: {e}")
+        logger.error(f"Error in api_alerts: {e}", exc_info=True)
         return jsonify([])
 
 @app.route('/api/start_detection', methods=['POST'])
@@ -463,6 +527,7 @@ def start_detection():
         interface = data.get('interface', 'lo')
         model_type = data.get('model_type', 'xgboost')
         duration = data.get('duration', 300)
+        threshold = data.get('threshold', None)
 
         if model_type != 'xgboost':
             model_type = 'xgboost'
@@ -475,12 +540,12 @@ def start_detection():
                 'validation': validation
             })
 
-        logger.info(f"Starting detection with {model_type} on {interface} for {duration}s")
+        logger.info(f"Starting detection with {model_type} on {interface} for {duration}s (threshold={threshold})")
         stop_event.clear()
         is_monitoring.set()
         detection_thread = threading.Thread(
             target=background_detection,
-            args=(interface, model_type, duration),
+            args=(interface, model_type, duration, threshold),
             name=f"Detection-{model_type}-{int(time.time())}",
             daemon=True
         )
@@ -493,7 +558,7 @@ def start_detection():
             'thread_id': detection_thread.name
         })
     except Exception as e:
-        logger.error(f"Start detection failed: {str(e)}")
+        logger.error(f"Start detection failed: {str(e)}", exc_info=True)
         is_monitoring.clear()
         return jsonify({'status': 'error', 'message': str(e)})
 
@@ -502,7 +567,7 @@ def start_monitoring():
     return start_detection()
 
 @app.route('/api/stop_detection', methods=['POST'])
-def stop_detection():
+def stop_detection_route():
     global detector, detection_thread, stop_event
     if not is_monitoring.is_set():
         return jsonify({'status': 'error', 'message': 'No detection running'})
@@ -540,7 +605,7 @@ def stop_detection():
             'thread_stopped': not (detection_thread and detection_thread.is_alive())
         })
     except Exception as e:
-        logger.error(f"Error stopping detection: {e}")
+        logger.error(f"Error stopping detection: {e}", exc_info=True)
         is_monitoring.clear()
         stop_event.set()
         system_status.update({
@@ -561,6 +626,7 @@ def analyze_pcap_endpoint():
         pcap_path = data.get('pcap_path')
         model_type = data.get('model_type', 'xgboost')
         max_packets = data.get('max_packets', 5000)
+        threshold = data.get('threshold', None)
 
         if not pcap_path:
             return jsonify({'status': 'error', 'message': 'PCAP path required'})
@@ -578,12 +644,12 @@ def analyze_pcap_endpoint():
                 'validation': validation
             })
 
-        logger.info(f"Starting PCAP analysis of {pcap_path} with {model_type}")
+        logger.info(f"Starting PCAP analysis of {pcap_path} with {model_type} (threshold={threshold})")
         stop_event.clear()
         is_monitoring.set()
         detection_thread = threading.Thread(
             target=background_pcap_analysis,
-            args=(pcap_path, model_type, max_packets),
+            args=(pcap_path, model_type, max_packets, threshold),
             name=f"PCAP-Analysis-{model_type}-{int(time.time())}",
             daemon=True
         )
@@ -596,7 +662,7 @@ def analyze_pcap_endpoint():
             'thread_id': detection_thread.name
         })
     except Exception as e:
-        logger.error(f"PCAP analysis failed: {str(e)}")
+        logger.error(f"PCAP analysis failed: {str(e)}", exc_info=True)
         is_monitoring.clear()
         return jsonify({'status': 'error', 'message': str(e)})
 
@@ -632,7 +698,7 @@ def api_pcap_list():
         files.sort(key=lambda x: x['modified'], reverse=True)
         logger.info(f"Found {len(files)} PCAP files")
     except Exception as e:
-        logger.error(f"PCAP list failed: {str(e)}")
+        logger.error(f"PCAP list failed: {str(e)}", exc_info=True)
     return jsonify(files)
 
 @app.route('/api/pcap_files')
