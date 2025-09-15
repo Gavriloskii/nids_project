@@ -130,9 +130,9 @@ function ensureRateCaption(rateId, alerts, tcpUdp) {
 function barsHtmlFromCounts(obj, topN = 6) {
   const entries = Object.entries(obj || {});
   if (entries.length === 0) return `<div class="small-muted">No data</div>`;
-  // FIX: sort by value index 1, not 6
-  const sorted = entries.sort((a,b) => b[10]-a[10]).slice(0, topN);
-  const max = Math.max(...sorted.map(x=>x[10])) || 1;
+  // FIX: sort by value (index 1)
+  const sorted = entries.sort((a, b) => b[14] - a[14]).slice(0, topN);
+  const max = Math.max(...sorted.map(x => x[14])) || 1;
   return sorted.map(([label, val], idx) => {
     const pct = Math.max(5, (val / max) * 100); // min visible width
     const colorClass = `c${(idx % 6) + 1}`;
@@ -184,8 +184,8 @@ function renderChartsForRows(rows) {
   }
 }
 
-async function loadLatestFileRowsForCharts(maxRows = 5000) {
-  // Prefer name from status if available to avoid undefined
+async function loadLatestFileRowsForCharts(maxRows = 200000) {
+  // Prefer name from status if available
   let newest = null;
   try {
     const st = lastStatus || await getStatus();
@@ -193,7 +193,7 @@ async function loadLatestFileRowsForCharts(maxRows = 5000) {
   } catch {}
 
   if (!newest) {
-    // Fallback to files endpoint
+    // Fallback to files endpoint: pick newest file at index 0
     let filesResp;
     try {
       filesResp = await jsonGet('/api/alerts/files');
@@ -210,9 +210,9 @@ async function loadLatestFileRowsForCharts(maxRows = 5000) {
     newest = files.name;
   }
 
-  // Avoid redundant rebuild if already from this file (optional)
+  // Avoid redundant rebuild if already from this file
   if (latestChartsFromFile === newest) return;
-  latestChartsFromFile = newest; // set early to avoid double-build races
+  latestChartsFromFile = newest;
 
   try {
     const page = await jsonGet(`/api/alerts/file?name=${encodeURIComponent(newest)}&offset=0&limit=${maxRows}`);
@@ -220,8 +220,7 @@ async function loadLatestFileRowsForCharts(maxRows = 5000) {
     renderChartsForRows(rows);
   } catch (e) {
     console.error('charts load error', e);
-    // Allow retry later
-    latestChartsFromFile = null;
+    latestChartsFromFile = null; // allow retry
   }
 }
 
@@ -245,13 +244,11 @@ function showCompletionToast(text = 'Session complete — charts updated from la
 
 /* ===================== Status polling with completion trigger ===================== */
 async function refreshStatus() {
-  // If we've frozen after completion, keep UI steady and stop polling updates into tiles.
   if (freezeAfterCompletion) return;
 
   const st = await getStatus();
   if (!st) return;
 
-  // First poll: initialize and return (prevents mid-run charts)
   if (!lastStatus) {
     lastStatus = st;
     setStatusPill(st);
@@ -259,41 +256,50 @@ async function refreshStatus() {
     const perfInit = preferFinalizedCounts(st, basePerf);
     if (activeTab === 'realtime') updateRealtimeTiles(perfInit);
     else updatePcapTiles(perfInit);
+
+    // NEW: when landing on a completed/stopped/idle state, load newest file on first paint
+    const doneLike = (st.status === 'completed' || st.status === 'stopped' || st.status === 'idle');
+    if (doneLike) {
+      try {
+        await loadLatestFileRowsForCharts(200000);
+      } catch (e) {
+        console.error('initial charts load error', e);
+      }
+      // small retry to survive file listing/writes
+      setTimeout(() => {
+        loadLatestFileRowsForCharts(200000).catch(()=>{});
+      }, 600);
+    }
     return;
   }
 
   setStatusPill(st);
 
-  // Buttons
   $('startBtn') && ($('startBtn').disabled   = !!st.is_monitoring);
   $('stopBtn') && ($('stopBtn').disabled    = !st.is_monitoring);
   $('analyzeBtn') && ($('analyzeBtn').disabled = !!st.is_monitoring);
 
-  // Prefer current_performance, fallback to performance_metrics; then prefer finalized counters
   const basePerf = st.current_performance || st.performance_metrics || {};
   const perf = preferFinalizedCounts(st, basePerf);
 
   if (activeTab === 'realtime') updateRealtimeTiles(perf);
   else updatePcapTiles(perf);
 
-  // Transition detection: build charts only when run finishes
   const prev = lastStatus.status;
   const now = st.status;
   const finished = (prev === 'running' || prev === 'analyzing_pcap') && (now === 'completed' || now === 'stopped' || now === 'error');
 
   if (finished) {
     try {
-      await loadLatestFileRowsForCharts(10000); // larger sample for big bursts
+      await loadLatestFileRowsForCharts(200000);
       showCompletionToast();
     } catch (e) {
       console.error('charts load error', e);
     }
-    // Timed retry to survive file write/listing timing
     setTimeout(() => {
-      loadLatestFileRowsForCharts(10000).catch(()=>{});
+      loadLatestFileRowsForCharts(200000).catch(()=>{});
     }, 600);
 
-    // Freeze tiles shortly after completion so they don't get overwritten by any subsequent idle/zero metrics
     freezeAfterCompletion = true;
     setTimeout(() => {
       stopStatusTimer();
@@ -320,10 +326,9 @@ async function startRealtime() {
     const out = await res.json();
     if (out.status !== 'success') console.warn('start failed', out);
 
-    // Reset chart source and status for new session
     latestChartsFromFile = null;
-    lastStatus = null; // force first-poll init for this session
-    freezeAfterCompletion = false; // allow updates during this new session
+    lastStatus = null;
+    freezeAfterCompletion = false;
     startStatusTimer();
   } catch (e) { console.error('start', e); }
 }
@@ -338,7 +343,7 @@ async function stopRealtime() {
 async function analyzePcap() {
   const path = $('pcapSelect').value;
   const maxPackets = Number($('maxPacketsInput').value || 5000);
-  const threshold = $('thresholdInput').value; // propagate threshold to PCAP for consistency
+  const threshold = $('thresholdInput').value;
   if (!path) return;
 
   const body = { pcap_path: path, max_packets: maxPackets, model_type: 'xgboost' };

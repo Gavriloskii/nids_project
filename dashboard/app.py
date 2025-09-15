@@ -241,7 +241,7 @@ def validate_model_files(model_type):
 # ---------------- File check helper ----------------
 def _snapshot_latest_file():
     files = _list_alert_files(limit=1)
-    return files[0] if files else None
+    return files if files else None
 
 def _update_last_file_status(before: dict | None):
     """Compare newest file now vs. 'before' snapshot and update system_status."""
@@ -266,16 +266,16 @@ def _update_last_file_status(before: dict | None):
 def background_detection(interface='lo', model_type='xgboost', duration=300, threshold: float | None = None):
     global detector, recent_alerts, system_status, stop_event
     try:
+        # enforce supported model
         if model_type != 'xgboost':
             logger.warning(f"Invalid model_type '{model_type}', coercing to 'xgboost'")
-            model_type = 'xgboost'
+            model_type = 'xgboost'  # minimal change, leave behavior the same
 
         logger.info(f"Starting {model_type} detection on {interface} (flow-based model)")
         validation = validate_model_files(model_type)
-        logger.info(f"Model validation result: {validation}")
-
         before_file = _snapshot_latest_file()
 
+        # publish run start
         system_status.update({
             'status': 'running',
             'started_at': time.time(),
@@ -291,44 +291,26 @@ def background_detection(interface='lo', model_type='xgboost', duration=300, thr
             'model_validation': validation
         })
 
+        # initialize detector
         detector = NetworkIntrusionDetector(interface=interface, model_type='xgboost', threshold=threshold)
         logger.info("Model loaded successfully")
 
-        alerts = []
-        start_time = time.time()
-        while not stop_event.is_set():
-            elapsed = time.time() - start_time
-            remaining = duration - elapsed
-            if remaining <= 0:
-                break
-            mini_duration = min(30, int(remaining))
-            if mini_duration < 1:
-                break
+        # SINGLE CONTINUOUS RUN — write ONE final artifact for the whole session
+        alerts = detector.detect_intrusions(duration=duration)
 
+        # honor stop without creating extra artifacts
+        if stop_event.is_set() and detector:
             try:
-                batch_alerts = detector.detect_intrusions(duration=mini_duration)
-                logger.info(f"mini-run alerts: +{len(batch_alerts)}")
-                alerts.extend(batch_alerts)
-                logger.info(f"accumulated alerts so far: {len(alerts)}")
-                system_status['progress'] = min(100, (elapsed / duration) * 100)
-                if stop_event.is_set():
-                    logger.info("Stop event detected in detection loop")
-                    break
-            except Exception as e:
-                logger.error(f"Error in detection mini-loop: {e}", exc_info=True)
-                break
+                detector.stop_detection()
+            except Exception:
+                pass
 
-        if detector:
-            remaining_flows = detector.stop_detection()
-            logger.info(f"Forced stop completed, processed {remaining_flows} remaining flows")
-
-        logger.info(f"end-of-run raw alerts before normalization: {len(alerts)}")
+        # normalize for UI and cache a small recent slice for debug endpoints
         processed_alerts = process_flow_alerts(alerts)
-        logger.info(f"Detection completed with {len(processed_alerts)} alerts (normalized)")
-
         with alerts_lock:
             recent_alerts = processed_alerts + recent_alerts[:100]
 
+        # publish performance + final counts used by tiles
         performance = detector.get_performance_metrics() if detector else {}
         system_status.update({
             'status': 'completed',
@@ -340,6 +322,7 @@ def background_detection(interface='lo', model_type='xgboost', duration=300, thr
             'can_stop': False
         })
 
+        # expose newest file so the frontend loads the correct artifact on completion
         _update_last_file_status(before_file)
 
     except Exception as e:
@@ -471,7 +454,7 @@ def api_alert_file_paginated():
     if not name:
         abort(400)
     offset = max(0, int(request.args.get('offset', '0')))
-    limit = max(1, min(10000, int(request.args.get('limit', '100'))))
+    limit = max(1, min(200000, int(request.args.get('limit', '200000'))))
     full = _safe_alert_path(name)
     rows = [process_single_alert(r) for r in _iter_alert_rows(full)]
     rows = [r for r in rows if r]
